@@ -1921,16 +1921,14 @@ static void binder_transaction(struct binder_proc *proc,
 	tcomplete->type = BINDER_WORK_TRANSACTION_COMPLETE;
 	list_add_tail(&tcomplete->entry, &thread->todo);
 	if (target_wait) {
-	#if defined(CONFIG_ARCH_HI6XXX) || defined (CONFIG_HISI_3635)
 		if (reply || !(t->flags & TF_ONE_WAY)) {
+			preempt_disable();
 			wake_up_interruptible_sync(target_wait);
+			sched_preempt_enable_no_resched();
 		}
 		else {
 			wake_up_interruptible(target_wait);
 		}
-	#else
-		wake_up_interruptible(target_wait);
-	#endif
 	}
 	return;
 
