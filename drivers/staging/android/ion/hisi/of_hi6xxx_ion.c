@@ -39,6 +39,8 @@
 #include <asm/outercache.h>
 #endif
 
+static struct ion_device *idev;
+
 struct hisi_ion_name_id_table {
     const char *name;
     unsigned int id;
@@ -111,6 +113,13 @@ struct ion_device *get_ion_device(void)
     return hisi_ion_device;		
 }		
 EXPORT_SYMBOL(get_ion_device);
+
+struct ion_client *hisi_ion_client_create(const char *name)
+{
+	return ion_client_create(idev, name);
+}
+
+EXPORT_SYMBOL(hisi_ion_client_create);
 
 
 static int __init get_id_by_name(const char *name, unsigned int *id)
