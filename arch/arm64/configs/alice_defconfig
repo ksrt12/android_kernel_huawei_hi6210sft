@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 3.10.107 Kernel Configuration
+# Linux/arm64 3.10.108 EOL Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -1781,7 +1781,6 @@ CONFIG_MEDIA_VIDEO_CONFIG=y
 #
 # Graphics support
 #
-# CONFIG_DRM is not set
 # CONFIG_VGASTATE is not set
 # CONFIG_VIDEO_OUTPUT_CONTROL is not set
 CONFIG_FB=y
@@ -2871,8 +2870,8 @@ CONFIG_DDR_INFORMATION=y
 # CONFIG_BATTERY_HISI_COUL_S is not set
 # CONFIG_BATTERY_HISI_COUL_TEST_S is not set
 # CONFIG_BQ_BCI_BATTERY_S is not set
-# CONFIG_MAX98925 is not set
-# CONFIG_SPEAKERID is not set
+CONFIG_MAX98925=y
+CONFIG_SPEAKERID=y
 # CONFIG_ANC_HS is not set
 # CONFIG_ANTENNA_FPGA is not set
 # CONFIG_HUAWEI_CHARGER is not set

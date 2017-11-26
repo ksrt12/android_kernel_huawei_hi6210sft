@@ -60,10 +60,9 @@ enum {
 
 #define irq_data_to_desc(data)	container_of(data, struct irq_desc, irq_data)
 
-extern int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
-		unsigned long flags);
-extern void __disable_irq(struct irq_desc *desc, unsigned int irq, bool susp);
-extern void __enable_irq(struct irq_desc *desc, unsigned int irq, bool resume);
+extern int __irq_set_trigger(struct irq_desc *desc, unsigned long flags);
+extern void __disable_irq(struct irq_desc *desc);
+extern void __enable_irq(struct irq_desc *desc);
 
 extern int irq_startup(struct irq_desc *desc, bool resend);
 extern void irq_shutdown(struct irq_desc *desc);
@@ -73,6 +72,13 @@ extern void irq_percpu_enable(struct irq_desc *desc, unsigned int cpu);
 extern void irq_percpu_disable(struct irq_desc *desc, unsigned int cpu);
 extern void mask_irq(struct irq_desc *desc);
 extern void unmask_irq(struct irq_desc *desc);
+extern void unmask_threaded_irq(struct irq_desc *desc);
+
+#ifdef CONFIG_SPARSE_IRQ
+static inline void irq_mark_irq(unsigned int irq) { }
+#else
+extern void irq_mark_irq(unsigned int irq);
+#endif
 
 extern void init_kstat_irqs(struct irq_desc *desc, int node, int nr);
 
@@ -80,7 +86,7 @@ irqreturn_t handle_irq_event_percpu(struct irq_desc *desc, struct irqaction *act
 irqreturn_t handle_irq_event(struct irq_desc *desc);
 
 /* Resending of interrupts :*/
-void check_irq_resend(struct irq_desc *desc, unsigned int irq);
+void check_irq_resend(struct irq_desc *desc);
 bool irq_wait_for_poll(struct irq_desc *desc);
 
 #ifdef CONFIG_PROC_FS
@@ -179,3 +185,15 @@ static inline bool irqd_has_set(struct irq_data *d, unsigned int mask)
 {
 	return d->state_use_accessors & mask;
 }
+
+#ifdef CONFIG_PM_SLEEP
+bool irq_pm_check_wakeup(struct irq_desc *desc);
+void irq_pm_install_action(struct irq_desc *desc, struct irqaction *action);
+void irq_pm_remove_action(struct irq_desc *desc, struct irqaction *action);
+#else
+static inline bool irq_pm_check_wakeup(struct irq_desc *desc) { return false; }
+static inline void
+irq_pm_install_action(struct irq_desc *desc, struct irqaction *action) { }
+static inline void
+irq_pm_remove_action(struct irq_desc *desc, struct irqaction *action) { }
+#endif
