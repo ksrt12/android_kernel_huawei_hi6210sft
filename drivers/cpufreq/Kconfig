@@ -369,4 +369,10 @@ config SH_CPU_FREQ
 endmenu
 
 endif
+
+config CPU_FREQ_NEW_TABLE
+	bool "Use new cpu_freq table with 1,5 Ghz"
+	help
+      Use new cpu_freq table with 1,5 Ghz
+
 endmenu

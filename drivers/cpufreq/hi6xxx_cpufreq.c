@@ -36,8 +36,8 @@
 #include "hi6xxx_cpufreq.h"
 
 
-#define ACTUAL_FREQ(cluster, freq)  (freq)
-#define VIRT_FREQ(cluster, freq)    (freq)
+#define ACTUAL_FREQ(cluster, freq)	((cluster == A53_CLUSTER_1) ? freq << 1 : freq)
+#define VIRT_FREQ(cluster, freq)	((cluster == A53_CLUSTER_1) ? freq >> 1 : freq)
 
 static struct cpufreq_hi6xxx_smp_ops *hi6xxx_smp_ops;
 static struct clk *clk[MAX_CLUSTERS];
@@ -201,8 +201,11 @@ static int smp_cpufreq_set_target(struct cpufreq_policy *policy,
 	freqs.old = smp_cpufreq_get_rate(cpu);
 
 	/* Determine valid target frequency using freq_table */
-	cpufreq_frequency_table_target(policy, freq_table[cur_cluster],
-			target_freq, relation, &freq_tab_idx);
+	ret = cpufreq_frequency_table_target(policy, freq_table[cur_cluster],
+ 			target_freq, relation, &freq_tab_idx);
+	if (ret)
+		return ret;
+
 	freqs.new = freq_table[cur_cluster][freq_tab_idx].frequency;
 
 	pr_debug("%s: cpu: %d, cluster: %d, oldfreq: %d, target freq: %d, new freq: %d\n",
@@ -335,23 +338,45 @@ static int _get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	char name[14] = "clk_acpu_stub";
 	int ret;
 
-	if (atomic_inc_return(&cluster_usage[cluster]) != 1)
+	if (freq_table[cluster])
 		return 0;
 
 	ret = hi6xxx_smp_ops->init_opp_table(cpu_dev);
 	if (ret) {
 		dev_err(cpu_dev, "%s: init_opp_table failed, cpu: %d, err: %d\n",
 				__func__, cpu_dev->id, ret);
-		goto atomic_dec;
+		goto out;
 	}
 
+#ifdef CONFIG_CPU_FREQ_NEW_TABLE
+	freq_table[cluster] = kzalloc(sizeof(struct cpufreq_frequency_table) * 7, GFP_KERNEL);
+    if (!freq_table[cluster]) {
+        dev_warn(cpu_dev, "%s: Unable to allocate frequency table\n", __func__);
+        return -ENOMEM;
+	}
+
+	freq_table[cluster][0].index = 0;
+	freq_table[cluster][0].frequency = 208000;
+	freq_table[cluster][1].index = 1;
+    freq_table[cluster][1].frequency = 432000;
+	freq_table[cluster][2].index = 2;
+    freq_table[cluster][2].frequency = 729000;
+	freq_table[cluster][3].index = 3;
+    freq_table[cluster][3].frequency = 960000;
+	freq_table[cluster][4].index = 4;
+    freq_table[cluster][4].frequency = 1200000;
+	freq_table[cluster][5].index = 5;
+    freq_table[cluster][5].frequency = 1500000;
+	freq_table[cluster][6].index = 6;
+    freq_table[cluster][6].frequency = CPUFREQ_TABLE_END;
+#else
 	ret = opp_init_cpufreq_table(cpu_dev, &freq_table[cluster]);
 	if (ret) {
 		dev_err(cpu_dev, "%s: failed to init cpufreq table, cpu: %d, err: %d\n",
 				__func__, cpu_dev->id, ret);
-		goto atomic_dec;
+		goto out;
 	}
-
+#endif
 	clk[cluster] = clk_get_sys(NULL, name);
 	if (!IS_ERR(clk[cluster])) {
 		dev_dbg(cpu_dev, "%s: clk: %p & freq table: %p, cluster: %d\n",
@@ -365,8 +390,7 @@ static int _get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	ret = PTR_ERR(clk[cluster]);
 	opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
 
-atomic_dec:
-	atomic_dec(&cluster_usage[cluster]);
+out:
 	dev_err(cpu_dev, "%s: Failed to get data for cluster: %d\n", __func__,
 			cluster);
 	return ret;
@@ -377,17 +401,21 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	u32 cluster = cpu_to_cluster(cpu_dev->id);
 	int i, ret;
 
-	if (cluster < MAX_CLUSTERS)
-		return _get_cluster_clk_and_freq_table(cpu_dev);
-
-	if (atomic_inc_return(&cluster_usage[MAX_CLUSTERS]) != 1)
-		return 0;
+	if (atomic_inc_return(&cluster_usage[cluster]) != 1)
+ 		return 0;
+ 
+	if (cluster < MAX_CLUSTERS) {
+		ret = _get_cluster_clk_and_freq_table(cpu_dev);
+		if (ret)
+			atomic_dec(&cluster_usage[cluster]);
+		return ret;
+	}
 
 	/*
 	 * Get data for all clusters and fill virtual cluster with a merge of
 	 * both
 	 */
-	for (i = 0; i < MAX_CLUSTERS; i++) {
+	for_each_present_cpu(i) {
 		struct device *cdev = get_cpu_device(i);
 		if (!cdev) {
 			pr_err("%s: failed to get cpu%d device\n", __func__, i);
@@ -413,11 +441,13 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	return 0;
 
 put_clusters:
-	while (i--) {
+	for_each_present_cpu(i) {
 		struct device *cdev = get_cpu_device(i);
 		if (!cdev) {
 			pr_err("%s: failed to get cpu%d device\n", __func__, i);
-			return -ENODEV;
+			ret = -ENODEV;
+		} else {
+			_put_cluster_clk_and_freq_table(cdev);
 		}
 
 		_put_cluster_clk_and_freq_table(cdev);
@@ -452,12 +482,12 @@ static int smp_cpufreq_init(struct cpufreq_policy *policy)
 	struct device *cpu_dev;
 	int ret;
 
-	/* cluster1 return if HMP defined */
+	/* cluster1 return if HMP defined *
 #ifdef CONFIG_SCHED_HMP
 	if(A53_CLUSTER_1 == cur_cluster) {
 		return -ENODEV;
 	}
-#endif
+#endif*/
 
 	cpu_dev = get_cpu_device(policy->cpu);
 	if (!cpu_dev) {
@@ -644,3 +674,4 @@ void smp_cpufreq_unregister(struct cpufreq_hi6xxx_smp_ops *ops)
 	hi6xxx_smp_ops = NULL;
 }
 EXPORT_SYMBOL_GPL(smp_cpufreq_unregister);
+
