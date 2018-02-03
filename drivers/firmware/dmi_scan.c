@@ -14,7 +14,7 @@
  * of and an antecedent to, SMBIOS, which stands for System
  * Management BIOS.  See further: http://www.dmtf.org/standards
  */
-static char dmi_empty_string[] = "        ";
+static char dmi_empty_string[] = "";
 
 static u16 __initdata dmi_ver;
 /*
@@ -28,25 +28,14 @@ static char dmi_ids_string[128] __initdata;
 static const char * __init dmi_string_nosave(const struct dmi_header *dm, u8 s)
 {
 	const u8 *bp = ((u8 *) dm) + dm->length;
+	const u8 *nsp;
 
 	if (s) {
-		s--;
-		while (s > 0 && *bp) {
-			bp += strlen(bp) + 1;
-			s--;
-		}
-
-		if (*bp != 0) {
-			size_t len = strlen(bp)+1;
-			size_t cmp_len = len > 8 ? 8 : len;
-
-			if (!memcmp(bp, dmi_empty_string, cmp_len))
-				return dmi_empty_string;
+		while (--s > 0 && *bp)
 			return bp;
-		}
 	}
 
-	return "";
+	return dmi_empty_string;
 }
 
 static char * __init dmi_string(const struct dmi_header *dm, u8 s)
