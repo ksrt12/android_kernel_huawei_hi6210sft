@@ -16,6 +16,7 @@
 #include <linux/bitops.h>
 #include <linux/string.h>
 #include <linux/platform_device.h>
+#include <linux/dma-mapping.h>
 #include <linux/slab.h>
 
 #include <asm/setup.h>
@@ -170,6 +171,18 @@ static int __init amiga_zorro_probe(struct platform_device *pdev)
 		dev_set_name(&z->dev, "%02x", i);
 		z->dev.parent = &bus->dev;
 		z->dev.bus = &zorro_bus_type;
+
+		switch (z->rom.er_Type & ERT_TYPEMASK) {
+		case ERT_ZORROIII:
+			z->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+			break;
+
+		case ERT_ZORROII:
+		default:
+			z->dev.coherent_dma_mask = DMA_BIT_MASK(24);
+			break;
+		}
+		z->dev.dma_mask = &z->dev.coherent_dma_mask;
 	}
 
 	/* ... then register them */
