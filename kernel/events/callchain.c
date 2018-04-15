@@ -107,14 +107,9 @@ int get_callchain_buffers(void)
 		goto exit;
 	}
 
-	if (count > 1) {
-		/* If the allocation failed, give up */
-		if (!callchain_cpus_entries)
-			err = -ENOMEM;
-		goto exit;
-	}
+	if (count == 1)
+		err = alloc_callchain_buffers();
 
-	err = alloc_callchain_buffers();
 exit:
 	mutex_unlock(&callchain_mutex);
 
