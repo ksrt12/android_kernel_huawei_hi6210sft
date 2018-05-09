@@ -491,9 +491,8 @@ static void rlb_update_client(struct rlb_client_info *client_info)
 {
 	int i;
 
-	if (!client_info->slave) {
-		return;
-	}
+	if (!client_info->slave || !is_valid_ether_addr(client_info->mac_dst))
+ 		return;
 
 	for (i = 0; i < RLB_ARP_BURST_SIZE; i++) {
 		struct sk_buff *skb;
