@@ -31,7 +31,6 @@ CONFIG_MALI400_DEBUG := n
 CONFIG_MALI_SHARED_INTERRUPTS :=y
 CONFIG_MALI450 :=y
 CONFIG_MALI_DMA_BUF_MAP_ON_ATTACH:=y
-CONFIG_MALI_DVFS := n
 
 # For customer releases the Linux Device Drivers will be provided as ARM proprietary and GPL releases:
 # The ARM proprietary product will only include the license/proprietary directory
