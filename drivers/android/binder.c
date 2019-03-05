@@ -46,9 +46,6 @@
 
 #include <uapi/linux/android/binder.h>
 #include "binder_trace.h"
-#ifdef CONFIG_HUAWEI_KSTATE
-#include <linux/hw_kcollect.h>
-#endif
 
 static HLIST_HEAD(binder_devices);
 
@@ -104,8 +101,8 @@ enum {
 	BINDER_DEBUG_PRIORITY_CAP           = 1U << 14,
 	BINDER_DEBUG_BUFFER_ALLOC_ASYNC     = 1U << 15,
 };
-static uint32_t binder_debug_mask = BINDER_DEBUG_USER_ERROR |
-	BINDER_DEBUG_FAILED_TRANSACTION | BINDER_DEBUG_DEAD_TRANSACTION;
+static uint32_t binder_debug_mask;
+
 module_param_named(debug_mask, binder_debug_mask, uint, S_IWUSR | S_IRUGO);
 
 static bool binder_debug_no_lock;
@@ -564,9 +561,8 @@ static size_t binder_buffer_size(struct binder_proc *proc,
 {
 	if (list_is_last(&buffer->entry, &proc->buffers))
 		return proc->buffer + proc->buffer_size - (void *)buffer->data;
-	else
-		return (size_t)list_entry(buffer->entry.next,
-			struct binder_buffer, entry) - (size_t)buffer->data;
+	return (size_t)list_entry(buffer->entry.next,
+			  struct binder_buffer, entry) - (size_t)buffer->data;
 }
 
 static void binder_insert_free_buffer(struct binder_proc *proc,
@@ -791,7 +787,6 @@ static struct binder_buffer *binder_alloc_buf(struct binder_proc *proc,
 				proc->pid, data_size, offsets_size);
 		return NULL;
 	}
-
 	size = data_offsets_size + ALIGN(extra_buffers_size, sizeof(void *));
 	if (size < data_offsets_size || size < extra_buffers_size) {
 		binder_user_error("%d: got transaction with invalid extra_buffers_size %zd\n",
@@ -1267,6 +1262,7 @@ static int binder_inc_ref(struct binder_ref *ref, int strong,
 	}
 	return 0;
 }
+
 
 static int binder_dec_ref(struct binder_ref **ptr_to_ref, int strong)
 {
@@ -1989,6 +1985,7 @@ static void binder_transaction(struct binder_proc *proc,
 	} else {
 		if (tr->target.handle) {
 			struct binder_ref *ref;
+
 			ref = binder_get_ref(proc, tr->target.handle, true);
 			if (ref == NULL) {
 				binder_user_error("%d:%d got transaction to invalid handle\n",
@@ -2010,16 +2007,6 @@ static void binder_transaction(struct binder_proc *proc,
 			return_error = BR_DEAD_REPLY;
 			goto err_dead_binder;
 		}
-#ifdef CONFIG_HUAWEI_KSTATE
-		/*
-		1.not oneway, sync call
-		2.called uid > 2000(SYSTEM_UID,PHONE_UID,WIFI_UID,MEDIA_UID,DRM_UID...)
-		3.pid not same
-		*/
-		if ((!(tr->flags & TF_ONE_WAY)) && (target_proc->tsk->cred->euid > 2000) && (proc->pid != target_proc->pid)) {
-			hwbinderinfo(proc->pid, target_proc->pid); //only get the binder call info
-		}
-#endif
 		if (security_binder_transaction(proc->tsk, target_proc->tsk) < 0) {
 			return_error = BR_FAILED_REPLY;
 			goto err_invalid_target_handle;
@@ -2095,7 +2082,7 @@ static void binder_transaction(struct binder_proc *proc,
 		t->from = thread;
 	else
 		t->from = NULL;
-	t->sender_euid = proc->tsk->cred->euid;
+	t->sender_euid = task_euid(proc->tsk);
 	t->to_proc = target_proc;
 	t->to_thread = target_thread;
 	t->code = tr->code;
@@ -2305,9 +2292,7 @@ static void binder_transaction(struct binder_proc *proc,
 		if (reply || !(t->flags & TF_ONE_WAY)) {
 			preempt_disable();
 			wake_up_interruptible_sync(target_wait);
-			sched_preempt_enable_no_resched();
-		}
-		else {
+		} else {
 			wake_up_interruptible(target_wait);
 		}
 	}
@@ -2355,7 +2340,7 @@ err_no_context_mgr_node:
 		thread->return_error = return_error;
 }
 
-static int binder_thread_write(struct binder_proc *proc,
+int binder_thread_write(struct binder_proc *proc,
 			struct binder_thread *thread,
 			binder_uintptr_t binder_buffer, size_t size,
 			binder_size_t *consumed)
@@ -2391,7 +2376,7 @@ static int binder_thread_write(struct binder_proc *proc,
 			if (target == 0 && context->binder_context_mgr_node &&
 			    (cmd == BC_INCREFS || cmd == BC_ACQUIRE)) {
 				ref = binder_get_ref_for_node(proc,
-					       context->binder_context_mgr_node);
+					context->binder_context_mgr_node);
 				if (ref->desc != target) {
 					binder_user_error("%d:%d tried to acquire reference to desc 0, got %d instead\n",
 						proc->pid, thread->pid,
@@ -2443,6 +2428,7 @@ static int binder_thread_write(struct binder_proc *proc,
 			binder_uintptr_t node_ptr;
 			binder_uintptr_t cookie;
 			struct binder_node *node;
+
 			if (get_user_preempt_disabled(node_ptr, (binder_uintptr_t __user *)ptr))
 				return -EFAULT;
 			ptr += sizeof(binder_uintptr_t);
@@ -2521,7 +2507,8 @@ static int binder_thread_write(struct binder_proc *proc,
 			}
 			binder_debug(BINDER_DEBUG_FREE_BUFFER,
 				     "%d:%d BC_FREE_BUFFER u%016llx found buffer %d for %s transaction\n",
-				     proc->pid, thread->pid, (u64)data_ptr, buffer->debug_id,
+				     proc->pid, thread->pid, (u64)data_ptr,
+				     buffer->debug_id,
 				     buffer->transaction ? "active" : "finished");
 
 			if (buffer->transaction) {
@@ -2533,10 +2520,7 @@ static int binder_thread_write(struct binder_proc *proc,
 				if (list_empty(&buffer->target_node->async_todo))
 					buffer->target_node->has_async_transaction = 0;
 				else
-			            /*BEGIN PN:DTS2016041203706 ,Modified by guodong/gwx333319 , 2016/04/19*/
-					list_move_tail(buffer->target_node->async_todo.next, &proc->todo);
-				    /*ENG   PN:DTS2016041203706 ,Modified by guodong/gwx333319 , 2016/04/19*/
-
+					list_move_tail(buffer->target_node->async_todo.next, &thread->todo);
 			}
 			trace_binder_transaction_buffer_release(buffer);
 			binder_transaction_buffer_release(proc, buffer, NULL);
@@ -2560,7 +2544,7 @@ static int binder_thread_write(struct binder_proc *proc,
 		case BC_REPLY: {
 			struct binder_transaction_data tr;
 
-				if (copy_from_user_preempt_disabled(&tr, ptr, sizeof(tr)))
+			if (copy_from_user_preempt_disabled(&tr, ptr, sizeof(tr)))
 				return -EFAULT;
 			ptr += sizeof(tr);
 			binder_transaction(proc, thread, &tr,
@@ -2611,11 +2595,11 @@ static int binder_thread_write(struct binder_proc *proc,
 			struct binder_ref *ref;
 			struct binder_ref_death *death;
 
-				if (get_user_preempt_disabled(target, (uint32_t __user *)ptr))
-					return -EFAULT;
-				ptr += sizeof(uint32_t);
-				if (get_user_preempt_disabled(cookie, (binder_uintptr_t __user *)ptr))
-					return -EFAULT;
+			if (get_user_preempt_disabled(target, (uint32_t __user *)ptr))
+				return -EFAULT;
+			ptr += sizeof(uint32_t);
+			if (get_user_preempt_disabled(cookie, (binder_uintptr_t __user *)ptr))
+				return -EFAULT;
 			ptr += sizeof(binder_uintptr_t);
 			ref = binder_get_ref(proc, target, false);
 			if (ref == NULL) {
@@ -2674,7 +2658,8 @@ static int binder_thread_write(struct binder_proc *proc,
 				if (death->cookie != cookie) {
 					binder_user_error("%d:%d BC_CLEAR_DEATH_NOTIFICATION death notification cookie mismatch %016llx != %016llx\n",
 						proc->pid, thread->pid,
-						(u64)death->cookie, (u64)cookie);
+						(u64)death->cookie,
+						(u64)cookie);
 					break;
 				}
 				ref->death = NULL;
@@ -2696,8 +2681,9 @@ static int binder_thread_write(struct binder_proc *proc,
 			struct binder_work *w;
 			binder_uintptr_t cookie;
 			struct binder_ref_death *death = NULL;
-				if (get_user_preempt_disabled(cookie, (binder_uintptr_t __user *)ptr))
-					return -EFAULT;
+
+			if (get_user_preempt_disabled(cookie, (binder_uintptr_t __user *)ptr))
+				return -EFAULT;
 
 			ptr += sizeof(cookie);
 			list_for_each_entry(w, &proc->delivered_death, entry) {
@@ -2776,8 +2762,8 @@ static int binder_thread_read(struct binder_proc *proc,
 	int wait_for_proc_work;
 
 	if (*consumed == 0) {
-			if (put_user_preempt_disabled(BR_NOOP, (uint32_t __user *)ptr))
-				return -EFAULT;
+		if (put_user_preempt_disabled(BR_NOOP, (uint32_t __user *)ptr))
+			return -EFAULT;
 		ptr += sizeof(uint32_t);
 	}
 
@@ -2787,16 +2773,16 @@ retry:
 
 	if (thread->return_error != BR_OK && ptr < end) {
 		if (thread->return_error2 != BR_OK) {
-				if (put_user_preempt_disabled(thread->return_error2, (uint32_t __user *)ptr))
-					return -EFAULT;
+			if (put_user_preempt_disabled(thread->return_error2, (uint32_t __user *)ptr))
+				return -EFAULT;
 			ptr += sizeof(uint32_t);
 			binder_stat_br(proc, thread, thread->return_error2);
 			if (ptr == end)
 				goto done;
 			thread->return_error2 = BR_OK;
 		}
-			if (put_user_preempt_disabled(thread->return_error, (uint32_t __user *)ptr))
-				return -EFAULT;
+		if (put_user_preempt_disabled(thread->return_error, (uint32_t __user *)ptr))
+			return -EFAULT;
 		ptr += sizeof(uint32_t);
 		binder_stat_br(proc, thread, thread->return_error);
 		thread->return_error = BR_OK;
@@ -2850,12 +2836,16 @@ retry:
 		struct binder_work *w;
 		struct binder_transaction *t = NULL;
 
-		if (!list_empty(&thread->todo))
-			w = list_first_entry(&thread->todo, struct binder_work, entry);
-		else if (!list_empty(&proc->todo) && wait_for_proc_work)
-			w = list_first_entry(&proc->todo, struct binder_work, entry);
-		else {
-			if (ptr - buffer == 4 && !(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN)) /* no data added */
+		if (!list_empty(&thread->todo)) {
+			w = list_first_entry(&thread->todo, struct binder_work,
+					     entry);
+		} else if (!list_empty(&proc->todo) && wait_for_proc_work) {
+			w = list_first_entry(&proc->todo, struct binder_work,
+					     entry);
+		} else {
+			/* no data added */
+			if (ptr - buffer == 4 &&
+			    !(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN))
 				goto retry;
 			break;
 		}
@@ -2869,8 +2859,8 @@ retry:
 		} break;
 		case BINDER_WORK_TRANSACTION_COMPLETE: {
 			cmd = BR_TRANSACTION_COMPLETE;
-				if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
-					return -EFAULT;
+			if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
+				return -EFAULT;
 			ptr += sizeof(uint32_t);
 
 			binder_stat_br(proc, thread, cmd);
@@ -2911,16 +2901,16 @@ retry:
 				node->has_weak_ref = 0;
 			}
 			if (cmd != BR_NOOP) {
-					if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
-						return -EFAULT;
-					ptr += sizeof(uint32_t);
-					if (put_user_preempt_disabled(node->ptr,
-						     (binder_uintptr_t __user *)ptr))
-						return -EFAULT;
-					ptr += sizeof(binder_uintptr_t);
-					if (put_user_preempt_disabled(node->cookie,
-						     (binder_uintptr_t __user *)ptr))
-						return -EFAULT;
+				if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
+					return -EFAULT;
+				ptr += sizeof(uint32_t);
+				if (put_user_preempt_disabled(node->ptr,
+					     (binder_uintptr_t __user *)ptr))
+					return -EFAULT;
+				ptr += sizeof(binder_uintptr_t);
+				if (put_user_preempt_disabled(node->cookie,
+					     (binder_uintptr_t __user *)ptr))
+					return -EFAULT;
 				ptr += sizeof(binder_uintptr_t);
 
 				binder_stat_br(proc, thread, cmd);
@@ -2934,16 +2924,20 @@ retry:
 				if (!weak && !strong) {
 					binder_debug(BINDER_DEBUG_INTERNAL_REFS,
 						     "%d:%d node %d u%016llx c%016llx deleted\n",
-						     proc->pid, thread->pid, node->debug_id,
-						     (u64)node->ptr, (u64)node->cookie);
+						     proc->pid, thread->pid,
+						     node->debug_id,
+						     (u64)node->ptr,
+						     (u64)node->cookie);
 					rb_erase(&node->rb_node, &proc->nodes);
 					kfree(node);
 					binder_stats_deleted(BINDER_STAT_NODE);
 				} else {
 					binder_debug(BINDER_DEBUG_INTERNAL_REFS,
 						     "%d:%d node %d u%016llx c%016llx state unchanged\n",
-						     proc->pid, thread->pid, node->debug_id,
-						     (u64)node->ptr, (u64)node->cookie);
+						     proc->pid, thread->pid,
+						     node->debug_id,
+						     (u64)node->ptr,
+						     (u64)node->cookie);
 				}
 			}
 		} break;
@@ -2958,14 +2952,12 @@ retry:
 				cmd = BR_CLEAR_DEATH_NOTIFICATION_DONE;
 			else
 				cmd = BR_DEAD_BINDER;
-
-				if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
-					return -EFAULT;
-				ptr += sizeof(uint32_t);
-				if (put_user_preempt_disabled(death->cookie,
-					     (binder_uintptr_t __user *)ptr))
-					return -EFAULT;
-
+			if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
+				return -EFAULT;
+			ptr += sizeof(uint32_t);
+			if (put_user_preempt_disabled(death->cookie,
+				     (binder_uintptr_t __user *)ptr))
+				return -EFAULT;
 			ptr += sizeof(binder_uintptr_t);
 			binder_stat_br(proc, thread, cmd);
 			binder_debug(BINDER_DEBUG_DEATH_NOTIFICATION,
@@ -3031,11 +3023,11 @@ retry:
 					ALIGN(t->buffer->data_size,
 					    sizeof(void *));
 
-			if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
-				return -EFAULT;
-			ptr += sizeof(uint32_t);
-			if (copy_to_user_preempt_disabled(ptr, &tr, sizeof(tr)))
-				return -EFAULT;
+		if (put_user_preempt_disabled(cmd, (uint32_t __user *)ptr))
+			return -EFAULT;
+		ptr += sizeof(uint32_t);
+		if (copy_to_user_preempt_disabled(ptr, &tr, sizeof(tr)))
+			return -EFAULT;
 		ptr += sizeof(tr);
 
 		trace_binder_transaction_received(t);
@@ -3076,9 +3068,8 @@ done:
 		binder_debug(BINDER_DEBUG_THREADS,
 			     "%d:%d BR_SPAWN_LOOPER\n",
 			     proc->pid, thread->pid);
-
-			if (put_user_preempt_disabled(BR_SPAWN_LOOPER, (uint32_t __user *)buffer))
-				return -EFAULT;
+		if (put_user_preempt_disabled(BR_SPAWN_LOOPER, (uint32_t __user *)buffer))
+			return -EFAULT;
 		binder_stat_br(proc, thread, BR_SPAWN_LOOPER);
 	}
 	return 0;
@@ -3152,7 +3143,7 @@ static struct binder_thread *binder_get_thread(struct binder_proc *proc)
 			break;
 	}
 	if (*p == NULL) {
-			thread = kzalloc_preempt_disabled(sizeof(*thread));
+		thread = kzalloc_preempt_disabled(sizeof(*thread));
 		if (thread == NULL)
 			return NULL;
 		binder_stats_created(BINDER_STAT_THREAD);
@@ -3242,6 +3233,111 @@ static unsigned int binder_poll(struct file *filp,
 	return 0;
 }
 
+static int binder_ioctl_write_read(struct file *filp,
+				unsigned int cmd, unsigned long arg,
+				struct binder_thread *thread)
+{
+	int ret = 0;
+	struct binder_proc *proc = filp->private_data;
+	unsigned int size = _IOC_SIZE(cmd);
+	void __user *ubuf = (void __user *)arg;
+	struct binder_write_read bwr;
+
+	if (size != sizeof(struct binder_write_read)) {
+		ret = -EINVAL;
+		goto out;
+	}
+	if (copy_from_user_preempt_disabled(&bwr, ubuf, sizeof(bwr))) {
+		ret = -EFAULT;
+		goto out;
+	}
+	binder_debug(BINDER_DEBUG_READ_WRITE,
+		     "%d:%d write %lld at %016llx, read %lld at %016llx\n",
+		     proc->pid, thread->pid,
+		     (u64)bwr.write_size, (u64)bwr.write_buffer,
+		     (u64)bwr.read_size, (u64)bwr.read_buffer);
+
+	if (bwr.write_size > 0) {
+		ret = binder_thread_write(proc, thread,
+					  bwr.write_buffer,
+					  bwr.write_size,
+					  &bwr.write_consumed);
+		trace_binder_write_done(ret);
+		if (ret < 0) {
+			bwr.read_consumed = 0;
+			if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr)))
+				ret = -EFAULT;
+			goto out;
+		}
+	}
+	if (bwr.read_size > 0) {
+		ret = binder_thread_read(proc, thread, bwr.read_buffer,
+					 bwr.read_size,
+					 &bwr.read_consumed,
+					 filp->f_flags & O_NONBLOCK);
+		trace_binder_read_done(ret);
+		if (!list_empty(&proc->todo))
+			wake_up_interruptible(&proc->wait);
+		if (ret < 0) {
+			if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr)))
+				ret = -EFAULT;
+			goto out;
+		}
+	}
+	binder_debug(BINDER_DEBUG_READ_WRITE,
+		     "%d:%d wrote %lld of %lld, read return %lld of %lld\n",
+		     proc->pid, thread->pid,
+		     (u64)bwr.write_consumed, (u64)bwr.write_size,
+		     (u64)bwr.read_consumed, (u64)bwr.read_size);
+	if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr))) {
+		ret = -EFAULT;
+		goto out;
+	}
+out:
+	return ret;
+}
+
+static int binder_ioctl_set_ctx_mgr(struct file *filp)
+{
+	int ret = 0;
+	struct binder_proc *proc = filp->private_data;
+	struct binder_context *context = proc->context;
+
+	kuid_t curr_euid = current_euid();
+
+	if (context->binder_context_mgr_node) {
+		pr_err("BINDER_SET_CONTEXT_MGR already set\n");
+		ret = -EBUSY;
+		goto out;
+	}
+	ret = security_binder_set_context_mgr(proc->tsk);
+	if (ret < 0)
+		goto out;
+	if (uid_valid(context->binder_context_mgr_uid)) {
+		if (!uid_eq(context->binder_context_mgr_uid, curr_euid)) {
+			pr_err("BINDER_SET_CONTEXT_MGR bad uid %d != %d\n",
+			       from_kuid(&init_user_ns, curr_euid),
+			       from_kuid(&init_user_ns,
+					 context->binder_context_mgr_uid));
+			ret = -EPERM;
+			goto out;
+		}
+	} else {
+		context->binder_context_mgr_uid = curr_euid;
+	}
+	context->binder_context_mgr_node = binder_new_node(proc, 0, 0);
+	if (!context->binder_context_mgr_node) {
+		ret = -ENOMEM;
+		goto out;
+	}
+	context->binder_context_mgr_node->local_weak_refs++;
+	context->binder_context_mgr_node->local_strong_refs++;
+	context->binder_context_mgr_node->has_strong_ref = 1;
+	context->binder_context_mgr_node->has_weak_ref = 1;
+out:
+	return ret;
+}
+
 static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret;
@@ -3268,54 +3364,11 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 
 	switch (cmd) {
-	case BINDER_WRITE_READ: {
-		struct binder_write_read bwr;
-		if (size != sizeof(struct binder_write_read)) {
-			ret = -EINVAL;
+	case BINDER_WRITE_READ:
+		ret = binder_ioctl_write_read(filp, cmd, arg, thread);
+		if (ret)
 			goto err;
-		}
-		if (copy_from_user_preempt_disabled(&bwr, ubuf, sizeof(bwr))) {
-			ret = -EFAULT;
-			goto err;
-		}
-		binder_debug(BINDER_DEBUG_READ_WRITE,
-			     "%d:%d write %lld at %016llx, read %lld at %016llx\n",
-			     proc->pid, thread->pid,
-			     (u64)bwr.write_size, (u64)bwr.write_buffer,
-			     (u64)bwr.read_size, (u64)bwr.read_buffer);
-
-		if (bwr.write_size > 0) {
-			ret = binder_thread_write(proc, thread, bwr.write_buffer, bwr.write_size, &bwr.write_consumed);
-			trace_binder_write_done(ret);
-			if (ret < 0) {
-				bwr.read_consumed = 0;
-				if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr)))
-					ret = -EFAULT;
-				goto err;
-			}
-		}
-		if (bwr.read_size > 0) {
-			ret = binder_thread_read(proc, thread, bwr.read_buffer, bwr.read_size, &bwr.read_consumed, filp->f_flags & O_NONBLOCK);
-			trace_binder_read_done(ret);
-			if (!list_empty(&proc->todo))
-				wake_up_interruptible(&proc->wait);
-			if (ret < 0) {
-				if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr)))
-					ret = -EFAULT;
-				goto err;
-			}
-		}
-		binder_debug(BINDER_DEBUG_READ_WRITE,
-			     "%d:%d wrote %lld of %lld, read return %lld of %lld\n",
-			     proc->pid, thread->pid,
-			     (u64)bwr.write_consumed, (u64)bwr.write_size,
-			     (u64)bwr.read_consumed, (u64)bwr.read_size);
-		if (copy_to_user_preempt_disabled(ubuf, &bwr, sizeof(bwr))) {
-			ret = -EFAULT;
-			goto err;
-		}
 		break;
-	}
 	case BINDER_SET_MAX_THREADS:
 		if (copy_from_user_preempt_disabled(&proc->max_threads, ubuf, sizeof(proc->max_threads))) {
 			ret = -EINVAL;
@@ -3323,33 +3376,9 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		break;
 	case BINDER_SET_CONTEXT_MGR:
-		if (context->binder_context_mgr_node) {
-			pr_err("BINDER_SET_CONTEXT_MGR already set\n");
-			ret = -EBUSY;
+		ret = binder_ioctl_set_ctx_mgr(filp);
+		if (ret)
 			goto err;
-		}
-		ret = security_binder_set_context_mgr(proc->tsk);
-		if (ret < 0)
-			goto err;
-		if (uid_valid(context->binder_context_mgr_uid)) {
-			if (!uid_eq(context->binder_context_mgr_uid, current->cred->euid)) {
-				pr_err("BINDER_SET_CONTEXT_MGR bad uid %d != %d\n",
-				       from_kuid(&init_user_ns, current->cred->euid),
-				       from_kuid(&init_user_ns, context->binder_context_mgr_uid));
-				ret = -EPERM;
-				goto err;
-			}
-		} else
-			context->binder_context_mgr_uid = current->cred->euid;
-		context->binder_context_mgr_node = binder_new_node(proc, 0, 0);
-		if (!context->binder_context_mgr_node) {
-			ret = -ENOMEM;
-			goto err;
-		}
-		context->binder_context_mgr_node->local_weak_refs++;
-		context->binder_context_mgr_node->local_strong_refs++;
-		context->binder_context_mgr_node->has_strong_ref = 1;
-		context->binder_context_mgr_node->has_weak_ref = 1;
 		break;
 	case BINDER_THREAD_EXIT:
 		binder_debug(BINDER_DEBUG_THREADS, "%d:%d exit\n",
@@ -3357,16 +3386,21 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		binder_free_thread(proc, thread);
 		thread = NULL;
 		break;
-	case BINDER_VERSION:
+	case BINDER_VERSION: {
+		struct binder_version __user *ver = ubuf;
+
 		if (size != sizeof(struct binder_version)) {
 			ret = -EINVAL;
 			goto err;
 		}
-		if (put_user_preempt_disabled(BINDER_CURRENT_PROTOCOL_VERSION, &((struct binder_version *)ubuf)->protocol_version)) {
+
+		if (put_user_preempt_disabled(BINDER_CURRENT_PROTOCOL_VERSION,
+			     &ver->protocol_version)) {
 			ret = -EINVAL;
 			goto err;
 		}
 		break;
+	}
 	default:
 		ret = -EINVAL;
 		goto err;
@@ -3414,7 +3448,7 @@ static int binder_vm_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 	return VM_FAULT_SIGBUS;
 }
 
-static struct vm_operations_struct binder_vm_ops = {
+static const struct vm_operations_struct binder_vm_ops = {
 	.open = binder_vma_open,
 	.close = binder_vma_close,
 	.fault = binder_vm_fault,
@@ -3423,6 +3457,7 @@ static struct vm_operations_struct binder_vm_ops = {
 static int binder_mmap(struct file *filp, struct vm_area_struct *vma)
 {
 	int ret;
+
 	struct vm_struct *area;
 	struct binder_proc *proc = filp->private_data;
 	const char *failure_string;
@@ -3492,7 +3527,6 @@ static int binder_mmap(struct file *filp, struct vm_area_struct *vma)
 		failure_string = "alloc small buf";
 		goto err_alloc_small_buf_failed;
 	}
-
 	buffer = proc->buffer;
 	INIT_LIST_HEAD(&proc->buffers);
 	list_add(&buffer->entry, &proc->buffers);
@@ -3775,6 +3809,7 @@ static void binder_deferred_func(struct work_struct *work)
 		container_of(work, struct binder_context, deferred_work);
 
 	int defer;
+
 	do {
 		trace_binder_lock(__func__);
 		mutex_lock(&context->binder_main_lock);

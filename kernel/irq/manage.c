@@ -352,14 +352,8 @@ setup_affinity(unsigned int irq, struct irq_desc *desc, struct cpumask *mask)
 }
 #endif
 
-void __disable_irq(struct irq_desc *desc, unsigned int irq, bool suspend)
+void __disable_irq(struct irq_desc *desc)
 {
-	if (suspend) {
-		if (!desc->action || (desc->action->flags & IRQF_NO_SUSPEND))
-			return;
-		desc->istate |= IRQS_SUSPENDED;
-	}
-
 	if (!desc->depth++)
 		irq_disable(desc);
 }
@@ -371,7 +365,7 @@ static int __disable_irq_nosync(unsigned int irq)
 
 	if (!desc)
 		return -EINVAL;
-	__disable_irq(desc, irq, false);
+	__disable_irq(desc);
 	irq_put_desc_busunlock(desc, flags);
 	return 0;
 }
@@ -412,24 +406,13 @@ void disable_irq(unsigned int irq)
 }
 EXPORT_SYMBOL(disable_irq);
 
-void __enable_irq(struct irq_desc *desc, unsigned int irq, bool resume)
+void __enable_irq(struct irq_desc *desc)
 {
-	if (resume) {
-		if (!(desc->istate & IRQS_SUSPENDED)) {
-			if (!desc->action)
-				return;
-			if (!(desc->action->flags & IRQF_FORCE_RESUME))
-				return;
-			/* Pretend that it got disabled ! */
-			desc->depth++;
-		}
-		desc->istate &= ~IRQS_SUSPENDED;
-	}
-
 	switch (desc->depth) {
 	case 0:
  err_out:
-		WARN(1, KERN_WARNING "Unbalanced enable for IRQ %d\n", irq);
+		WARN(1, KERN_WARNING "Unbalanced enable for IRQ %d\n",
+		     irq_desc_get_irq(desc));
 		break;
 	case 1: {
 		if (desc->istate & IRQS_SUSPENDED)
@@ -437,7 +420,7 @@ void __enable_irq(struct irq_desc *desc, unsigned int irq, bool resume)
 		/* Prevent probing on this irq: */
 		irq_settings_set_noprobe(desc);
 		irq_enable(desc);
-		check_irq_resend(desc, irq);
+		check_irq_resend(desc);
 		/* fall-through */
 	}
 	default:
@@ -467,7 +450,7 @@ void enable_irq(unsigned int irq)
 		 KERN_ERR "enable_irq before setup/request_irq: irq %u\n", irq))
 		goto out;
 
-	__enable_irq(desc, irq, false);
+	__enable_irq(desc);
 out:
 	irq_put_desc_busunlock(desc, flags);
 }
@@ -558,8 +541,7 @@ int can_request_irq(unsigned int irq, unsigned long irqflags)
 	return canrequest;
 }
 
-int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
-		      unsigned long flags)
+int __irq_set_trigger(struct irq_desc *desc, unsigned long flags)
 {
 	struct irq_chip *chip = desc->irq_data.chip;
 	int ret, unmask = 0;
@@ -569,7 +551,8 @@ int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
 		 * IRQF_TRIGGER_* but the PIC does not support multiple
 		 * flow-types?
 		 */
-		pr_debug("No set_type function for IRQ %d (%s)\n", irq,
+		pr_debug("No set_type function for IRQ %d (%s)\n",
+			 irq_desc_get_irq(desc),
 			 chip ? (chip->name ? : "unknown") : "unknown");
 		return 0;
 	}
@@ -605,7 +588,7 @@ int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
 		break;
 	default:
 		pr_err("Setting trigger mode %lu for irq %u failed (%pF)\n",
-		       flags, irq, chip->irq_set_type);
+		       flags, irq_desc_get_irq(desc), chip->irq_set_type);
 	}
 	if (unmask)
 		unmask_irq(desc);
@@ -713,7 +696,7 @@ again:
 
 	if (!desc->threads_oneshot && !irqd_irq_disabled(&desc->irq_data) &&
 	    irqd_irq_masked(&desc->irq_data))
-		unmask_irq(desc);
+		unmask_threaded_irq(desc);
 
 out_unlock:
 	raw_spin_unlock_irq(&desc->lock);
@@ -1089,8 +1072,8 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 
 		/* Setup the type (level, edge polarity) if configured: */
 		if (new->flags & IRQF_TRIGGER_MASK) {
-			ret = __irq_set_trigger(desc, irq,
-					new->flags & IRQF_TRIGGER_MASK);
+			ret = __irq_set_trigger(desc,
+						new->flags & IRQF_TRIGGER_MASK);
 
 			if (ret)
 				goto out_mask;
@@ -1136,6 +1119,8 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 	new->irq = irq;
 	*old_ptr = new;
 
+	irq_pm_install_action(desc, new);
+
 	/* Reset broken irq detection when installing new handler */
 	desc->irq_count = 0;
 	desc->irqs_unhandled = 0;
@@ -1146,7 +1131,7 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 	 */
 	if (shared && (desc->istate & IRQS_SPURIOUS_DISABLED)) {
 		desc->istate &= ~IRQS_SPURIOUS_DISABLED;
-		__enable_irq(desc, irq, false);
+		__enable_irq(desc);
 	}
 
 	raw_spin_unlock_irqrestore(&desc->lock, flags);
@@ -1254,6 +1239,8 @@ static struct irqaction *__free_irq(unsigned int irq, void *dev_id)
 
 	/* Found it - now remove it from the list of entries: */
 	*action_ptr = action->next;
+
+	irq_pm_remove_action(desc, action);
 
 	/* If this was the last handler, shut down the IRQ line: */
 	if (!desc->action)
@@ -1429,8 +1416,13 @@ int request_threaded_irq(unsigned int irq, irq_handler_t handler,
 	 * otherwise we'll have trouble later trying to figure out
 	 * which interrupt is which (messes up the interrupt freeing
 	 * logic etc).
+	 *
+	 * Also IRQF_COND_SUSPEND only makes sense for shared interrupts and
+	 * it cannot be set along with IRQF_NO_SUSPEND.
 	 */
-	if ((irqflags & IRQF_SHARED) && !dev_id)
+	if (((irqflags & IRQF_SHARED) && !dev_id) ||
+	    (!(irqflags & IRQF_SHARED) && (irqflags & IRQF_COND_SUSPEND)) ||
+	    ((irqflags & IRQF_NO_SUSPEND) && (irqflags & IRQF_COND_SUSPEND)))
 		return -EINVAL;
 
 	desc = irq_to_desc(irq);
@@ -1543,7 +1535,7 @@ void enable_percpu_irq(unsigned int irq, unsigned int type)
 	if (type != IRQ_TYPE_NONE) {
 		int ret;
 
-		ret = __irq_set_trigger(desc, irq, type);
+		ret = __irq_set_trigger(desc, type);
 
 		if (ret) {
 			WARN(1, "failed to set type for IRQ%d\n", irq);

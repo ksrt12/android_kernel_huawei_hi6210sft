@@ -18,7 +18,9 @@
 #include <linux/workqueue.h>
 #include <linux/kmod.h>
 #include <linux/wakeup_reason.h>
-/* 
+#include <linux/cpuset.h>
+
+/*
  * Timeout for stopping processes
  */
 unsigned int __read_mostly freeze_timeout_msecs = 20 * MSEC_PER_SEC;
@@ -156,6 +158,7 @@ int freeze_processes(void)
 	if (!pm_freezing)
 		atomic_inc(&system_freezing_cnt);
 
+	pm_wakeup_clear();
 	printk("Freezing user space processes ... ");
 	pm_freezing = true;
 	oom_kills_saved = oom_kills_count();
@@ -228,6 +231,8 @@ void thaw_processes(void)
 
 	__usermodehelper_set_disable_depth(UMH_FREEZING);
 	thaw_workqueues();
+
+	cpuset_wait_for_hotplug();
 
 	read_lock(&tasklist_lock);
 	do_each_thread(g, p) {

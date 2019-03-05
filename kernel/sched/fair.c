@@ -3146,7 +3146,7 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 /* Used instead of source_load when we know the type == 0 */
 static unsigned long weighted_cpuload(const int cpu)
 {
-	return cpu_rq(cpu)->cfs.runnable_load_avg;
+	return cpu_rq(cpu)->load.weight;
 }
 
 /*
@@ -3191,10 +3191,9 @@ static unsigned long cpu_avg_load_per_task(int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
 	unsigned long nr_running = ACCESS_ONCE(rq->nr_running);
-	unsigned long load_avg = rq->cfs.runnable_load_avg;
 
 	if (nr_running)
-		return load_avg / nr_running;
+		return rq->load.weight / nr_running;
 
 	return 0;
 }
@@ -6698,7 +6697,6 @@ void idle_balance(int this_cpu, struct rq *this_rq)
 			continue;
 
 		if (sd->flags & SD_BALANCE_NEWIDLE) {
-			/* If we've pulled tasks over stop searching: */
 			pulled_task = load_balance(this_cpu, this_rq,
 						   sd, CPU_NEWLY_IDLE, &balance);
 		}
@@ -6706,7 +6704,11 @@ void idle_balance(int this_cpu, struct rq *this_rq)
 		interval = msecs_to_jiffies(sd->balance_interval);
 		if (time_after(next_balance, sd->last_balance + interval))
 			next_balance = sd->last_balance + interval;
-		if (pulled_task) {
+			/*
+ 			* Stop searching for tasks to pull if there are
+ 			* now runnable tasks on this rq.
+ 			*/
+  			if (pulled_task || this_rq->nr_running > 0) {
 			this_rq->idle_stamp = 0;
 			break;
 		}

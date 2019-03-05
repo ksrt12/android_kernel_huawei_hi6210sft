@@ -2179,6 +2179,8 @@ extern int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf);
 extern qsize_t *ext4_get_reserved_space(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
+extern int ext4_issue_zeroout(struct inode *inode, ext4_lblk_t lblk,
+			      ext4_fsblk_t pblk, ext4_lblk_t len);
 
 /* indirect.c */
 extern int ext4_ind_map_blocks(handle_t *handle, struct inode *inode,
@@ -2213,16 +2215,7 @@ extern int search_dir(struct buffer_head *bh,
 		      struct inode *dir,
 		      const struct qstr *d_name,
 		      unsigned int offset,
-/* BEGIN PN:DTS2014072604297  , Modified by d00168349, 2014/07/26 */
-/* DTS2014061003046 2014/6/11 h00206996 sdcardfs ci begin*/
-#ifdef CONFIG_SDCARD_FS_CI_SEARCH
-                      struct ext4_dir_entry_2 ** res_dir,
-                      char *ci_name_buf);
-#else
 		      struct ext4_dir_entry_2 **res_dir);
-#endif
-/* DTS2014061003046 2014/6/11 h00206996 sdcardfs ci end*/
-/* END PN:DTS2014072604297  , Modified by d00168349, 2014/07/26 */
 extern int ext4_generic_delete_entry(handle_t *handle,
 				     struct inode *dir,
 				     struct ext4_dir_entry_2 *de_del,
@@ -2610,16 +2603,7 @@ extern int htree_inlinedir_to_tree(struct file *dir_file,
 extern struct buffer_head *ext4_find_inline_entry(struct inode *dir,
 					const struct qstr *d_name,
 					struct ext4_dir_entry_2 **res_dir,
-/* BEGIN PN:DTS2014072604297  , Modified by d00168349, 2014/07/26 */
-/* DTS2014061003046 2014/6/11 h00206996 sdcardfs ci begin*/
-#ifdef CONFIG_SDCARD_FS_CI_SEARCH
-                                        int *has_inline_data,
-                                        char* ci_name_buf);
-#else
 					int *has_inline_data);
-#endif
-/* DTS2014061003046 2014/6/11 h00206996 sdcardfs ci end*/
-/* END PN:DTS2014072604297  , Modified by d00168349, 2014/07/26 */
 extern int ext4_delete_inline_entry(handle_t *handle,
 				    struct inode *dir,
 				    struct ext4_dir_entry_2 *de_del,
