@@ -211,6 +211,7 @@ endif
 endif
 
 ccflags-y += -DSVN_REV_STRING=\"$(DRIVER_REV)\"
+#ccflags-y += -std=gnu11
 
 VERSION_STRINGS :=
 VERSION_STRINGS += API_VERSION=$(shell cd $(MALISRC); grep "\#define _MALI_API_VERSION" $(FILES_PREFIX)include/linux/mali/mali_utgard_uk_types.h | cut -d' ' -f 3 )

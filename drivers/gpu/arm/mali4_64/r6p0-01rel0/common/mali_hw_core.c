@@ -13,7 +13,7 @@
 #include "mali_kernel_common.h"
 #include "mali_osk_mali.h"
 
-_mali_osk_errcode_t mali_hw_core_create(struct mali_hw_core *core, const _mali_osk_resource_t *resource, u32 reg_size)
+_mali_osk_errcode_t mali_hw_core_create(struct mali_hw_core *core, const _mali_osk_resource_t *resource, int reg_size)
 {
 	core->phys_addr = resource->base;
 	core->phys_offset = resource->base - _mali_osk_resource_base_address();

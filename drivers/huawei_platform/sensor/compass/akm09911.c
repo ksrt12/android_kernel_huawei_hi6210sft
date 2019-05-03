@@ -1635,6 +1635,7 @@ static struct device_attribute akm_compass_attributes[] = {
 	__ATTR_NULL,
 };
 /* END PN: DTS2014031803623 , Modified by f00184246,2014-3-18*/
+#undef __BIN_ATTR
 #define __BIN_ATTR(name_, mode_, size_, private_, read_, write_) \
 	{ \
 		.attr    = { .name = __stringify(name_), .mode = mode_ }, \
@@ -1643,7 +1644,7 @@ static struct device_attribute akm_compass_attributes[] = {
 		.read    = read_, \
 		.write   = write_, \
 	}
-
+#undef __BIN_ATTR_NULL
 #define __BIN_ATTR_NULL \
 	{ \
 		.attr   = { .name = NULL }, \
