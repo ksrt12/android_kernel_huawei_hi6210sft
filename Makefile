@@ -383,7 +383,11 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Wimplicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks 
+		   -fno-delete-null-pointer-checks
+
+KBUILD_CFLAGS   += -Wno-unused-variable -Wno-unused-function -Wno-unused-label -Wno-implicit-function-declaration \
+                   -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast -Wno-sizeof-pointer-memaccess \
+                   -Wno-declaration-after-statement -DHISI_EFUSE_DEBUG=0
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
