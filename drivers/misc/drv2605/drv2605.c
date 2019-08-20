@@ -329,15 +329,14 @@ static void drv2605_change_mode(struct drv2605_data *data, char work_mode, char 
 	}
 }
 
-
 /*******************************************************************************************
-Function:	read_vibrator_calib_value_from_nv
-Description:   读取NV项中的vibrator 校准数据
-Data Accessed:  无
-Data Updated:   无
-Input:         无
-Output:         无
-Return:         成功或者失败信息: 0->成功, -1->失败
+Function: read_vibrator_calib_value_from_nv
+Description: Read the vibrator calibration data in the NV item
+Data Accessed: None
+Data Updated: None
+Input: None
+Output: None
+Return: Success or failure information: 0->Success, -1->Failed
 *******************************************************************************************/
 static int read_vibrator_calib_value_from_nv(void)
 {
@@ -366,13 +365,13 @@ static int read_vibrator_calib_value_from_nv(void)
 }
 
 /*******************************************************************************************
-Function:	write_vibrator_calib_value_to_nv
-Description:  将temp数据写入NV 项中
-Data Accessed:  无
-Data Updated:   无
-Input:        vibrator 校准值
-Output:         无
-Return:         成功或者失败信息: 0->成功, -1->失败
+Function: write_vibrator_calib_value_to_nv
+Description: Write temp data to NV item
+Data Accessed: None
+Data Updated: None
+Input: vibrator calibration value
+Output: None
+Return: Success or failure information: 0->Success, -1->Failed
 *******************************************************************************************/
 static int write_vibrator_calib_value_to_nv(char* temp)
 {
@@ -405,13 +404,13 @@ static int write_vibrator_calib_value_to_nv(char* temp)
 }
 
 /*******************************************************************************************
-Function:	save_vibrator_calib_value_to_reg
-Description:  将校准值写入芯片寄存器中
-Data Accessed:  无
-Data Updated:   无
-Input:        无
-Output:         无
-Return:         成功或者失败信息: 0->成功, -1->失败
+Function: save_vibrator_calib_value_to_reg
+Description: Write the calibration value to the chip register
+Data Accessed: None
+Data Updated: None
+Input: None
+Output: None
+Return: Success or failure information: 0->Success, -1->Failed
 *******************************************************************************************/
 static int save_vibrator_calib_value_to_reg(void)
 {
@@ -840,7 +839,7 @@ static ssize_t vibrator_dbc_test_store(struct device *dev, struct device_attribu
 		drv2605_reg_write(data, REAL_TIME_PLAYBACK_REG, 0x81);
 		drv2605_reg_write(data, MODE_REG, 0x05);
 	}else{
-		dev_info(&(data->client->dev), "vibrator dbc test value is invalid:%d\n",value);
+		dev_info(&(data->client->dev), "vibrator dbc test value is invalid:%llu\n",value);
 	}
 	error = count;
 out:
@@ -997,7 +996,7 @@ static ssize_t dev2605_write(struct file* filp, const char* buff, size_t len, lo
 		case HAPTIC_CMDID_PLAY_EFFECT_SEQUENCE:
 		{
 			if(len > 9){
-				printk("%s, play effect len (%d) error,\n", __FUNCTION__,len);
+				printk("%s, play effect len (%zd) error,\n", __FUNCTION__,len);
 				break;
 			}
 			memset(&data->sequence, 0, WAVEFORM_SEQUENCER_MAX);

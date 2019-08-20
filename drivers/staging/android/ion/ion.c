@@ -624,12 +624,12 @@ static struct ion_handle *__ion_alloc(struct ion_client *client, size_t len,
 	len = PAGE_ALIGN(len);
 
 	if (!len) {
-		pr_err("%s: illegal len: 0x%x\n", __func__, len);
+		pr_err("%s: illegal len: 0x%zx\n", __func__, len);
 		return ERR_PTR(-EINVAL);
 	}
 
 	if (len > SZ_128M) {
-		pr_err("%s: size more than 32M(0x%x), pid: %d, process name: %s\n",
+		pr_err("%s: size more than 32M(0x%zx), pid: %d, process name: %s\n",
 			__func__, len, current->pid, current->comm);
 	}
 
@@ -1768,7 +1768,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						data.allocation.flags, true);
 		if (IS_ERR(handle)) {
 			pr_err("%s: ion alloc failed!"
-				" len: %x, align: %x, heap_id_mask: %x, flags: %x\n",
+				" len: %zx, align: %zx, heap_id_mask: %x, flags: %x\n",
 				__func__, data.allocation.len, data.allocation.align,
 				data.allocation.heap_id_mask, data.allocation.flags);
 			return PTR_ERR(handle);

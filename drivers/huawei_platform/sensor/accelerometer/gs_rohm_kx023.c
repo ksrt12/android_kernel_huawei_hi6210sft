@@ -440,8 +440,8 @@ static int rohm_acc_enable_set(struct sensors_classdev *sensors_cdev,unsigned in
     unsigned int val;
     int ret;
     val=enable;
-    gs_INFO("[GS]%s: val=%ld\n", __func__, val);
-    if(val)
+    gs_INFO("[GS]%s: val=%u\n", __func__, val);
+    if (val)
     {
         if(!atomic_cmpxchg(&a_flag, 0, 1))
         {

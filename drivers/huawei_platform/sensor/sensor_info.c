@@ -409,7 +409,7 @@ static ssize_t store_sensor_DT_test(struct device *dev,
 		pr_err("store_sensor_DT_test val, val = %ld\n", val);
 		return -EINVAL;
 	}
-	pr_err("store_sensor_DT_test val=%d\n",val);
+	pr_err("store_sensor_DT_test val=%lu\n",val);
 	if(1==val)
 	{
 		DT_tset=true;

@@ -1385,7 +1385,7 @@ int32 patch_recv_mem(OS_KERNEL_FILE_STRU *fp, int32 len, int32 type)
     fs = get_fs();
     set_fs(KERNEL_DS);
     l_ret = vfs_llseek(fp, 0, SEEK_END);
-    PS_PRINT_INFO("pos = %ld", fp->f_pos);
+    PS_PRINT_INFO("pos = %lld", fp->f_pos);
     while (len > lenbuf)//RECV_BUF_LEN)
     {
         l_ret = read_msg(pdatabuf + lenbuf, len - lenbuf, type);
@@ -1629,7 +1629,7 @@ int32 patch_number_type(uint8 *Key, uint8 *Value, int32 type)
         fp = patch_readm_fileopen(type);
         if (IS_ERR(fp))
         {
-            PS_PRINT_ERR("create file error,fp = 0x%p, errorno=%d\n", fp, PTR_ERR(fp));
+            PS_PRINT_ERR("create file error,fp = 0x%p, errorno=%ld\n", fp, PTR_ERR(fp));
             return SUCC;
         }
         l_ret = patch_int_para_send(Key, Value, type);
@@ -2584,7 +2584,7 @@ int32 create_recover_flag(void)
         fp = filp_open(SDIO_RECOVER_FLAG_FILE, O_RDWR | O_CREAT, 0664);
         if(IS_ERR(fp))
         {
-            PS_PRINT_ERR("create/open file %s failed, fd:%ld\n", SDIO_RECOVER_FLAG_FILE, fp);
+            PS_PRINT_ERR("create/open file %s failed, fd:%s\n", SDIO_RECOVER_FLAG_FILE, fp);
             return 1;
         }
         filp_close(fp, NULL);

@@ -43,12 +43,12 @@ int log_to_jank(int tag, int prio,const char* fmt, ...);
 #endif
 
 #else
-#define pr_jank(tag, fmt, ...)	(-ENOENT)
-#define LOG_JANK_D(tag, fmt, ...)	(-ENOENT)
-#define LOG_JANK_W(tag, fmt, ...)	(-ENOENT)
-#define LOG_JANK_V(tag, fmt, ...)	(-ENOENT)
-#define LOG_JANK_I(tag, fmt, ...)	(-ENOENT)
-#define LOG_JANK_E(tag, fmt, ...)	(-ENOENT)
+#define pr_jank(tag, fmt, ...)
+#define LOG_JANK_D(tag, fmt, ...)
+#define LOG_JANK_W(tag, fmt, ...)
+#define LOG_JANK_V(tag, fmt, ...)
+#define LOG_JANK_I(tag, fmt, ...)
+#define LOG_JANK_E(tag, fmt, ...)
 #endif
 
 #endif

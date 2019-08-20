@@ -691,7 +691,7 @@ static int hisi_ion_proc_show(struct seq_file *m, void *v)
 
     seq_printf(m, "name\t\t\t id\t type\t\t\t base\t\t size\r\n");
     for(i = 0; i < hisi_ion_platform_data.nr; i++){
-        seq_printf(m, "%-16s\t %u\t %-18s\t 0x%08lx\t 0x%08x\r\n", hisi_ion_platform_heap[i].name, \
+        seq_printf(m, "%-16s\t %u\t %-18s\t 0x%08lx\t 0x%08zu\r\n", hisi_ion_platform_heap[i].name, \
             hisi_ion_platform_heap[i].id, get_type_by_id(hisi_ion_platform_heap[i].type), \
             hisi_ion_platform_heap[i].base, hisi_ion_platform_heap[i].size);
     }

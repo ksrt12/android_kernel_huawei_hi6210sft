@@ -379,7 +379,7 @@ struct ion_heap *ion_system_heap_create(struct ion_platform_heap *unused)
 		goto err_alloc_pools;
 	
 	if(hisi_iommu_page_size() == SZ_8K) {
-		printk(KERN_INFO"cur size %lx orders %lx\n",hisi_iommu_page_size(),num_orders);
+		printk(KERN_INFO"cur size %u orders %x\n",hisi_iommu_page_size(),num_orders);
 		orders[num_orders -1] = 1;	
 	}
 	

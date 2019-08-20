@@ -250,7 +250,7 @@ static void hi6210_pasr_apply_mask(u32 *mem_reg, void *cookie)
     printk(KERN_ERR"pass pasr argument for use of mcu [0x%x]:0x%x, [0x%x]:0x%x\n", 
                        &pasr_addr[rank*2], pasr_addr[rank*2], &pasr_addr[rank*2+1], pasr_addr[rank*2+1]);
     for(i=0;i<4;i++) {
-        printk(KERN_ERR"[0x%x]:0x%x\n", &pasr_addr[i], pasr_addr[i]);         
+        printk(KERN_ERR"[0x%u]:0x%u\n", &pasr_addr[i], pasr_addr[i]);         
     }
 #else
 	if (ddr_hwlock != NULL)

@@ -85,7 +85,7 @@ static int rdtp_fail_times = 0;
  *
  * 1.0.4	Added Input Report Event
  */
-
+#define DRIVER_VERSION        "1.0.4"
 /*
  * Management functions
  */

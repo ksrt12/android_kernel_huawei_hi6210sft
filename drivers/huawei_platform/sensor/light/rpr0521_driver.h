@@ -22,7 +22,6 @@ SE.  See the
 /* GENERAL */
 #include	<linux/sensors.h>
 #define RPR521_DRV_NAME	"rpr521"
-#define DRIVER_VERSION		"1.0"
 
 #define THRES_TOLERANCE	 40//15	//I think this is a proper value. It should not be too big.
 #define THRES_DIFF		20		//I am not sure whether this is a proper value but I guess so. 

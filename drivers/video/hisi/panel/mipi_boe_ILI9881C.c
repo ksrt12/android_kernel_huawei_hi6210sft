@@ -2645,7 +2645,7 @@ static int mipi_boe_panel_on(struct platform_device* pdev)
             /* lcd display on sequence */
             mipi_dsi_cmds_tx(boe_display_on_cmds, \
                              ARRAY_SIZE(boe_display_on_cmds), balongfd->dsi_base);
-            balongfb_loge("ARRAY_SIZE(boe_display_on_cmds):%d.\n", ARRAY_SIZE(boe_display_on_cmds));
+            balongfb_loge("ARRAY_SIZE(boe_display_on_cmds):%lu.\n", ARRAY_SIZE(boe_display_on_cmds));
 
             g_display_on = true;
             /*first set sbl to panel*/

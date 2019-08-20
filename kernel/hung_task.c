@@ -544,7 +544,7 @@ static ssize_t enable_store(struct kobject *kobj,
 
 	memset(tmp, 0, sizeof(tmp));
 	strncpy(tmp, buf, len);
-	pr_err("hung_task:tmp=%s, count %d\n", tmp, count);
+	pr_err("hung_task:tmp=%s, count %zd\n", tmp, count);
 
 	if (strncmp(tmp, "on", strlen(tmp)) == 0) {
 		hungtask_enable = HT_ENABLE;

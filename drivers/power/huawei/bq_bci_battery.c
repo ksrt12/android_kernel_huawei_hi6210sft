@@ -1010,7 +1010,7 @@ static ssize_t bq_bci_poll_charge_start_event(struct device *dev, struct device_
 
     struct bq_bci_device_info *di = dev_get_drvdata(dev);
     if(di){
-        return sprintf(buf, "%d\n", di->event);
+        return sprintf(buf, "%ld\n", di->event);
     }else{
         return 0;
     }

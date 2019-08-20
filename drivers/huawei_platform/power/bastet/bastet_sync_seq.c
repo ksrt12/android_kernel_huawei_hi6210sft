@@ -764,7 +764,7 @@ int prepare_bastet_sock(struct bst_set_sock_sync_delay *sync_prop)
 		return -EPERM;
 	}
 
-	BASTET_LOGI("sk: %p, hold_time: %ld", sk, sync_prop->hold_time);
+	BASTET_LOGI("sk: %p, hold_time: %u", sk, sync_prop->hold_time);
 
 	bsk = sk->bastet;
 	if (NULL == bsk) {

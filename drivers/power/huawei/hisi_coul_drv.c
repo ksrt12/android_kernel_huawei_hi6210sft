@@ -516,8 +516,6 @@ int hisi_battery_aging_safe_policy(AGING_SAFE_POLICY_TYPE *asp)
 }
 
 /****************************************************************************
-
-/****************************************************************************
   Function:     hisi_battery_health
   Description:  get the health state of battery
   Input:        NA

@@ -932,7 +932,7 @@ static int iwpriv_get_assoc_list(struct net_device *dev,
 		extra, p_iwrq->data.length, p_iwrq->data.pointer, p_iwrq->data.flags));
 	memset(sta_maclist, 0, sizeof(mac_buf));
 	sta_maclist->count = 8;
-	WL_SOFTAP(("%s: net device:%s, buf_sz:%d\n",
+	WL_SOFTAP(("%s: net device:%s, buf_sz:%zd\n",
 		__FUNCTION__, dev->name, sizeof(mac_buf)));
 	if ((ret = get_assoc_sta_list(dev, mac_buf, sizeof(mac_buf))) < 0) {
 		WL_ERROR(("%s: sta list ioctl error:%d\n",

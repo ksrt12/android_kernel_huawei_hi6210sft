@@ -29,7 +29,7 @@ static ssize_t hwconn_read_proc_chiptype(struct file *filp, const char __user *b
         return -EINVAL;
     }
 
-    printk(KERN_INFO "[HW_CONN] hwconn_read_proc_chiptype off = %d\n", (unsigned long)*off);
+    printk(KERN_INFO "[HW_CONN] hwconn_read_proc_chiptype off = %lu\n", (unsigned long)*off);
     if ((unsigned long)*off > 0) {
         return 0;
     }

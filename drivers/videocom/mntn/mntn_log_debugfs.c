@@ -189,7 +189,7 @@ static ssize_t video_mntn_cfg_write(struct file *filp, const char __user *buffer
     if (copy_from_user(cmd_buf, buffer, count)) {
         return -EFAULT;
     }
-    pr_info("%s, length = %d, %s", __func__, count, cmd_buf);
+    pr_info("%s, length = %zd, %s", __func__, count, cmd_buf);
 
     ret = sscanf(cmd_buf, "%s %d,%d,%d", cmd_name, &module_id, &param1, &param2);  /* [false alarm] kernel中的sscanf没有对应的安全函数  */
 

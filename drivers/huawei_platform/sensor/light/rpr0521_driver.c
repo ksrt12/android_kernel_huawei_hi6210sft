@@ -47,7 +47,7 @@
 #include <linux/board_sensors.h>
 #include <huawei_platform/sensor/sensor_info.h>
 #include <huawei_platform/log/log_jank.h>
-
+#define DRIVER_VERSION		"1.0"
 #ifdef CONFIG_HUAWEI_HW_DEV_DCT
 #include <linux/hw_dev_dec.h>
 #endif
@@ -61,10 +61,10 @@
 #define RPR0521_I2C_RETRY_COUNT		3 	/* Number of times to retry i2c */ 
 #define RPR0521_I2C_RETRY_TIMEOUT	1	/* Timeout between retry (miliseconds) */
 
-#define     RPR0521_I2C_BYTE   0
-#define     RPR0521_I2C_WORD   1
-#define 	RPR_FAR_THRESHOLD(x)		(rpr0521_min_proximity_value<(x)?(x):rpr0521_min_proximity_value)
-#define 	RPR_NEAR_THRESHOLD(x)		((RPR_FAR_THRESHOLD(x) + rpr0521_pwindows_value)>0xFFF?0xFFF:(RPR_FAR_THRESHOLD(x) + rpr0521_pwindows_value))
+#define RPR0521_I2C_BYTE   0
+#define RPR0521_I2C_WORD   1
+#define RPR_FAR_THRESHOLD(x)  (rpr0521_min_proximity_value<(x)?(x):rpr0521_min_proximity_value)
+#define RPR_NEAR_THRESHOLD(x) ((RPR_FAR_THRESHOLD(x) + rpr0521_pwindows_value)>0xFFF?0xFFF:(RPR_FAR_THRESHOLD(x) + rpr0521_pwindows_value))
 //const unsigned long data0_coefficient[COEFFICIENT] = {192, 141, 127, 117};
 //const unsigned long data1_coefficient[COEFFICIENT] = {316, 108,  86,  74};
 //const unsigned long judge_coefficient[COEFFICIENT] = { 29,  65,  85, 158}; 
@@ -511,7 +511,7 @@ static int rpr521_get_gpio(struct ALS_PS_DATA *data, struct i2c_client *client)
 	data->rpr0521_gpio = of_get_named_gpio(client->dev.of_node, "proximity_gpio", 0);
 	if (!gpio_is_valid(data->rpr0521_gpio)) {
 
-		als_ps_INFO("[ALS_PS]%s: rpr521 irq gpio is not valid\n");
+		als_ps_INFO("[ALS_PS]%s: rpr521 irq gpio is not valid\n", __func__);
 		rc = -EINVAL;
 	}
 	return rc;

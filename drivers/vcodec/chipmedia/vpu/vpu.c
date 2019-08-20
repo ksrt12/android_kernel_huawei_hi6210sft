@@ -281,7 +281,7 @@ static int vpu_alloc_dma_buffer(vpudrv_buffer_t *vb)
     /*add by g00260377 for security issue @DTS2015110502810 2015.11.03 begin*/
     if (vb->size > s_vmem.mem_size)
     {
-        vpu_loge("No enough memory to alloc, required size = %u, actual support max size = %u \n",
+        vpu_loge("No enough memory to alloc, required size = %u, actual support max size = %lu\n",
             vb->size, s_vmem.mem_size);
         return -1;
     }
@@ -1651,7 +1651,7 @@ static int vpu_map_to_register(struct file *fp, struct vm_area_struct *vm)
     /*add by g00260377 for security issue @DTS2015110502810 2015.11.03 begin*/
     if ((vm->vm_end - vm->vm_start) != VPU_BIT_REG_SIZE)
     {
-        vpu_logi(" maped reg size out of range, required size = %u, actual support size = %u\n",
+        vpu_logi(" maped reg size out of range, required size = %lu, actual support size = %d\n",
             (vm->vm_end - vm->vm_start), VPU_BIT_REG_SIZE);
         return -EAGAIN;
      }

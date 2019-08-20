@@ -1164,7 +1164,7 @@ void hiusb_otg_and_phy_setup(int mode)
     udelay(60);
 
     if(0 == mode){
-        pr_info("%s:override_eyediagram=0x%x. \n",__func__,override_eyediagram);
+        pr_info("%s:override_eyediagram=0x%s. \n",__func__,override_eyediagram);
         if(override_eyediagram > 0)
         {
             writel(override_eyediagram, SOC_PERI_SCTRL_SC_PERIPH_CTRL8_ADDR(g_hiusb_info->pericrg_base));

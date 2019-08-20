@@ -697,7 +697,7 @@ static ssize_t fsg_store_file(struct device *dev, struct device_attribute *attr,
 			fsg_lun_close(curlun);
 			curlun->unit_attention_data = SS_MEDIUM_NOT_PRESENT;
 		}
-		pr_info("fsg_store_file: count=%d, buf=%p, needclose=%d\n", count, buf, needclose);
+		pr_info("fsg_store_file: count=%zd, buf=%p, needclose=%d\n", count, buf, needclose);
 	}
 	up_write(filesem);
 	return (rc < 0 ? rc : count);

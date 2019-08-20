@@ -16,11 +16,10 @@
 #include <linux/regulator/consumer.h>
 #include <linux/wakelock.h>
 #include "rpr0521_driver.h"
-#include	<linux/sensors.h>
+#include <linux/sensors.h>
 #define APDS990x_DRV_NAME    "apds990x"
-#define DRIVER_VERSION        "1.0.4"
 
-#define    PL990x_POWER_NAME    "PROXIMITY_LIGHT_VDD_SENSOR"
+#define PL990x_POWER_NAME    "PROXIMITY_LIGHT_VDD_SENSOR"
 #define APDS990x_INT        IRQ_EINT20
 
 #define APDS990x_PS_DETECTION_THRESHOLD        550
@@ -73,63 +72,63 @@
  * Structs
  */
 struct apds990x_data {
-	struct i2c_client *client;
-	struct mutex update_lock;
-	/* BEGIN PN:DTS2014091802039,add by suzhanzheng, 2014/9/18*/
-	struct mutex single_lock;
-	/* END PN:DTS2014091802039,add by suzhanzheng, 2014/9/18*/
-	struct workqueue_struct *ps_wq;
-	struct delayed_work	dwork;    /* for PS interrupt */
-	struct delayed_work	als_dwork; /* for ALS polling */
-	/* BEGIN PN:DTS2014071407794   , Added by f00184246, 2014/07/14*/
-	struct delayed_work    power_work;
-	/* END PN:DTS2014071407794   , Added by f00184246, 2014/07/14*/
-	struct input_dev *input_dev_als;
-	struct input_dev *input_dev_ps;
-       struct sensors_classdev als_cdev;
-       struct sensors_classdev ps_cdev;
-	unsigned int enable;
-	unsigned int atime;
-	unsigned int ptime;
-	unsigned int wtime;
-	unsigned int ailt;
-	unsigned int aiht;
-	unsigned int pilt;
-	unsigned int piht;
-	unsigned int pers;
-	unsigned int config;
-	unsigned int ppcount;
-	unsigned int control;
-	int	irq;
-	int apds_gpio;
+    struct i2c_client *client;
+    struct mutex update_lock;
+    /* BEGIN PN:DTS2014091802039,add by suzhanzheng, 2014/9/18*/
+    struct mutex single_lock;
+    /* END PN:DTS2014091802039,add by suzhanzheng, 2014/9/18*/
+    struct workqueue_struct *ps_wq;
+    struct delayed_work    dwork;    /* for PS interrupt */
+    struct delayed_work    als_dwork; /* for ALS polling */
+    /* BEGIN PN:DTS2014071407794   , Added by f00184246, 2014/07/14*/
+    struct delayed_work    power_work;
+    /* END PN:DTS2014071407794   , Added by f00184246, 2014/07/14*/
+    struct input_dev *input_dev_als;
+    struct input_dev *input_dev_ps;
+    struct sensors_classdev als_cdev;
+    struct sensors_classdev ps_cdev;
+    unsigned int enable;
+    unsigned int atime;
+    unsigned int ptime;
+    unsigned int wtime;
+    unsigned int ailt;
+    unsigned int aiht;
+    unsigned int pilt;
+    unsigned int piht;
+    unsigned int pers;
+    unsigned int config;
+    unsigned int ppcount;
+    unsigned int control;
+    int irq;
+    int apds_gpio;
 
-	/* control flag from HAL */
-	unsigned int enable_ps_sensor;
-	unsigned int enable_als_sensor;
+    /* control flag from HAL */
+    unsigned int enable_ps_sensor;
+    unsigned int enable_als_sensor;
 
-	/* PS parameters */
-	unsigned int ps_lock;
-	unsigned int ps_threshold;
-	unsigned int ps_hysteresis_threshold; /* always lower than ps_threshold */
-	unsigned int ps_detection;        /* 0 = near-to-far; 1 = far-to-near */
-	unsigned int ps_data;            /* to store PS data */
+    /* PS parameters */
+    unsigned int ps_lock;
+    unsigned int ps_threshold;
+    unsigned int ps_hysteresis_threshold; /* always lower than ps_threshold */
+    unsigned int ps_detection;        /* 0 = near-to-far; 1 = far-to-near */
+    unsigned int ps_data;            /* to store PS data */
 
     /* ALS parameters */
-	unsigned int als_threshold_l;    /* low threshold */
-	unsigned int als_threshold_h;    /* high threshold */
-	unsigned int als_data;            /* to store ALS data */
+    unsigned int als_threshold_l;    /* low threshold */
+    unsigned int als_threshold_h;    /* high threshold */
+    unsigned int als_data;            /* to store ALS data */
 
-	unsigned int als_gain;            /* needed for Lux calculation */
-	unsigned int als_poll_delay;    /* needed for light sensor polling : micro-second (us) */
-	unsigned int als_atime;            /* storage for als integratiion time */
-//	struct early_suspend early_suspend;
-	struct regulator *apds990x_vdd;
-	struct regulator *apds990x_io_vdd;
-	struct wake_lock wake_lock;
-	struct hrtimer timer;
-	int irq_count;
+    unsigned int als_gain;            /* needed for Lux calculation */
+    unsigned int als_poll_delay;    /* needed for light sensor polling : micro-second (us) */
+    unsigned int als_atime;            /* storage for als integratiion time */
+//  struct early_suspend early_suspend;
+    struct regulator *apds990x_vdd;
+    struct regulator *apds990x_io_vdd;
+    struct wake_lock wake_lock;
+    struct hrtimer timer;
+    int irq_count;
 #if defined(CONFIG_FB)
-	struct notifier_block fb_notify;
+    struct notifier_block fb_notify;
 #endif
 };
 
@@ -138,8 +137,8 @@ extern ssize_t ts_chip_info_show(struct device *dev, struct device_attribute *at
 extern ssize_t cyttsp5_chip_info_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 extern ssize_t cyttsp5_chip_info_show(struct device *dev, struct device_attribute *attr, char *buf);
 struct apds990x_platform_data {
-	int (*gpio_config_interrupt)(void);
-	int (*power_on)(struct device *);
-	int (*power_off)(void);
-	int apds990x_gpio;
+    int (*gpio_config_interrupt)(void);
+    int (*power_on)(struct device *);
+    int (*power_off)(void);
+    int apds990x_gpio;
 };

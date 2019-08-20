@@ -100,7 +100,7 @@ struct charge_params {
     unsigned int       voltagemV;
     unsigned int       term_currentmA;
     unsigned int       enable_iterm;
-    bool                enable;
+    bool               enable;
 };
 
 struct hi6521_device_info {
@@ -112,102 +112,102 @@ struct hi6521_device_info {
 #if DPM_CHECK_FOR_V204
     struct delayed_work   hi6521_dpm_check_work;
 #endif
-	struct work_struct    hi6521_irq_work;
+    struct work_struct    hi6521_irq_work;
     struct work_struct    usb_work;
-	struct workqueue_struct *scharger_int_workqueue;
-	struct semaphore      charger_data_busy_lock;
-	unsigned int          wakelock_enabled;
+    struct workqueue_struct *scharger_int_workqueue;
+    struct semaphore      charger_data_busy_lock;
+    unsigned int          wakelock_enabled;
 
-	SOC_SCHARGER_STATUS0_UNION      charge_status_reg;
-	SOC_SCHARGER_BUCK_REG3_UNION    buck_sysmin_sel_reg;
-	SOC_SCHARGER_BUCK_REG4_UNION    input_source_reg;
-	SOC_SCHARGER_ONFF0_UNION		power_on_config_reg00;
-	SOC_SCHARGER_ONFF1_UNION        power_on_config_reg01;
-	SOC_SCHARGER_CHG_REG0_UNION     charge_pre_current_vol_reg;
-	SOC_SCHARGER_CHG_REG1_UNION     charge_fast_current_reg;
-	SOC_SCHARGER_CHG_REG2_UNION     charge_fast_vol_term_cur_reg;
-	SOC_SCHARGER_CHG_REG3_UNION		charge_pre_timer_rechg_timer_vol_reg;
-	SOC_SCHARGER_CHG_REG4_UNION 	charge_fast_safe_timer_term_ctrl_reg;
-	SOC_SCHARGER_IRQM0_UNION	    charge_irq_mask0_reg;
-	SOC_SCHARGER_IRQM1_UNION	    charge_irq_mask1_reg;
-	SOC_SCHARGER_IRQM2_UNION	    charge_irq_mask2_reg;
-	SOC_SCHARGER_IRQM3_UNION	    charge_irq_mask3_reg;
-	SOC_SCHARGER_IRQM4_UNION	    charge_irq_mask4_reg;
-	SOC_SCHARGER_SYS_SET_REG_UNION  charge_set_chgwdt_timer_reg;
-	SOC_SCHARGER_CTRL_REG_UNION     charge_chgwdt_rst_reg;
-	SOC_SCHARGER_OTG_REG0_UNION     charge_otg_reg0;
-	SOC_SCHARGER_REF_REG_UNION      charge_ref_reg;
+    SOC_SCHARGER_STATUS0_UNION      charge_status_reg;
+    SOC_SCHARGER_BUCK_REG3_UNION    buck_sysmin_sel_reg;
+    SOC_SCHARGER_BUCK_REG4_UNION    input_source_reg;
+    SOC_SCHARGER_ONFF0_UNION        power_on_config_reg00;
+    SOC_SCHARGER_ONFF1_UNION        power_on_config_reg01;
+    SOC_SCHARGER_CHG_REG0_UNION     charge_pre_current_vol_reg;
+    SOC_SCHARGER_CHG_REG1_UNION     charge_fast_current_reg;
+    SOC_SCHARGER_CHG_REG2_UNION     charge_fast_vol_term_cur_reg;
+    SOC_SCHARGER_CHG_REG3_UNION     charge_pre_timer_rechg_timer_vol_reg;
+    SOC_SCHARGER_CHG_REG4_UNION     charge_fast_safe_timer_term_ctrl_reg;
+    SOC_SCHARGER_IRQM0_UNION        charge_irq_mask0_reg;
+    SOC_SCHARGER_IRQM1_UNION        charge_irq_mask1_reg;
+    SOC_SCHARGER_IRQM2_UNION        charge_irq_mask2_reg;
+    SOC_SCHARGER_IRQM3_UNION        charge_irq_mask3_reg;
+    SOC_SCHARGER_IRQM4_UNION        charge_irq_mask4_reg;
+    SOC_SCHARGER_SYS_SET_REG_UNION  charge_set_chgwdt_timer_reg;
+    SOC_SCHARGER_CTRL_REG_UNION     charge_chgwdt_rst_reg;
+    SOC_SCHARGER_OTG_REG0_UNION     charge_otg_reg0;
+    SOC_SCHARGER_REF_REG_UNION      charge_ref_reg;
     SOC_SCHARGER_FLASH_LED_REG4_UNION flash_led_reg4;
-	SOC_SCHARGER_FLASH_LED_REG6_UNION flash_led_reg6;
+    SOC_SCHARGER_FLASH_LED_REG6_UNION flash_led_reg6;
     SOC_SCHARGER_FLASH_LED_REG7_UNION flash_led_reg7;
 
     SOC_SCHARGER_BUCK_REG5_UNION buck_reg5;
 
     unsigned short    bqchip_version;
 
-	/*power_on_config_reg00*/
-	unsigned char 	  flash_led_torch_en;
-	unsigned char 	  flash_led_flash_en;
-	unsigned char 	  flash_bst_en;
-	unsigned char 	  lcd_bst_en;
-	unsigned char 	  lcd_ldo_en;
-	unsigned char 	  lcd_ncp_en;
+    /*power_on_config_reg00*/
+    unsigned char       flash_led_torch_en;
+    unsigned char       flash_led_flash_en;
+    unsigned char       flash_bst_en;
+    unsigned char       lcd_bst_en;
+    unsigned char       lcd_ldo_en;
+    unsigned char       lcd_ncp_en;
 
-	/*power_on_config_reg01*/
-	unsigned char 	  chg_en;
-	unsigned char 	  otg_en;
-	unsigned char 	  wled_en;
-	unsigned char 	  ldo1_200ma_en;
-	unsigned char 	  ldo2_200ma_en;
+    /*power_on_config_reg01*/
+    unsigned char       chg_en;
+    unsigned char       otg_en;
+    unsigned char       wled_en;
+    unsigned char       ldo1_200ma_en;
+    unsigned char       ldo2_200ma_en;
 
-	/*charge_fast_current_reg*/
-	unsigned int    chg_fast_ichg;
+    /*charge_fast_current_reg*/
+    unsigned int    chg_fast_ichg;
 
-	/*charge_pre_current_vol_reg*/
-	unsigned int    chg_pre_ichg;
-	unsigned int    chg_pre_vchg;
-	unsigned char   batfet_ctrl;
+    /*charge_pre_current_vol_reg*/
+    unsigned int    chg_pre_ichg;
+    unsigned int    chg_pre_vchg;
+    unsigned char   batfet_ctrl;
 
-	/*charge_fast_vol_term_cur_reg*/
-	unsigned int    chg_fast_vchg;
-	unsigned int    chg_term_ichg;
+    /*charge_fast_vol_term_cur_reg*/
+    unsigned int    chg_fast_vchg;
+    unsigned int    chg_term_ichg;
 
-	/*charge_pre_timer_rechg_timer_vol_reg*/
-	unsigned int 	chg_prechg_timer;
-	unsigned int 	chg_rechg_time;
-	unsigned int 	chg_vrechg_hys;
+    /*charge_pre_timer_rechg_timer_vol_reg*/
+    unsigned int    chg_prechg_timer;
+    unsigned int    chg_rechg_time;
+    unsigned int    chg_vrechg_hys;
 
-	/*charge_fast_safe_timer_term_ctrl_reg*/
-	unsigned char	chg_termination_ctrl;
-	unsigned int 	chg_fastchg_safe_timer;
-	unsigned int	chg_vbatir_adj;
+    /*charge_fast_safe_timer_term_ctrl_reg*/
+    unsigned char   chg_termination_ctrl;
+    unsigned int    chg_fastchg_safe_timer;
+    unsigned int    chg_vbatir_adj;
 
-	/*charge_ref_reg*/
-	unsigned int    chg_thsd_tstp_set;
-	unsigned int    chg_thsd_treg_set;
+    /*charge_ref_reg*/
+    unsigned int    chg_thsd_tstp_set;
+    unsigned int    chg_thsd_treg_set;
 
-	/*flash_led_timeout_reg*/
-	unsigned int    chg_flash_led_timeout;
-	unsigned int    chg_flash_torch_timeout;
+    /*flash_led_timeout_reg*/
+    unsigned int    chg_flash_led_timeout;
+    unsigned int    chg_flash_torch_timeout;
 
-	/*flash led timerout enable*/
-	unsigned char    chg_flash_led_timeout_en;
-	/*charge_chgwdt_rst_reg*/
-	unsigned char   flash_led_wd_rst;
-	unsigned char   wd_rst_n;
-	unsigned char   soft_rst_n;
+    /*flash led timerout enable*/
+    unsigned char   chg_flash_led_timeout_en;
+    /*charge_chgwdt_rst_reg*/
+    unsigned char   flash_led_wd_rst;
+    unsigned char   wd_rst_n;
+    unsigned char   soft_rst_n;
 
-	/*charge_set_chgwdt_timer_reg*/
-	unsigned int    watchdog_timer;
+    /*charge_set_chgwdt_timer_reg*/
+    unsigned int    watchdog_timer;
 
-	/*otg reg0*/
-	unsigned char   otg_force_en;
+    /*otg reg0*/
+    unsigned char   otg_force_en;
 
     unsigned int    max_currentmA;
     unsigned int    max_voltagemV;
     unsigned int    max_cin_currentmA;
 
-	/*input_source_reg*/
+    /*input_source_reg*/
     unsigned int    cin_dpmmV;
     unsigned int    cin_limit;
     unsigned int    sys_minmV;
@@ -222,13 +222,13 @@ struct hi6521_device_info {
     /*buck_reg5*/
     unsigned int    buck_dpm_mode;
 
-    bool    		factory_flag;
-    //bool    		hot_enable_charge_flag;
-    bool    		calling_limit;
-    bool    		battery_present;
-	bool    		backup_battery_exist;
-    //int     		charge_status;
-    int     		charger_source;
+    bool            factory_flag;
+    //bool            hot_enable_charge_flag;
+    bool            calling_limit;
+    bool            battery_present;
+    bool            backup_battery_exist;
+    //int             charge_status;
+    int             charger_source;
     unsigned int    battery_temp_status;
     unsigned long           event;
     struct notifier_block   nb;
@@ -243,7 +243,7 @@ struct hi6521_device_info {
     bool    battery_full;
     int     temperature_5;
     int     temperature_10;
-    unsigned int  charge_full_count;
+    unsigned int charge_full_count;
 
     /* these parameters are for charging between 0C-5C & 5C-10C, 1-0.1*capacity...
        charge_in_temp_5 means the parameter for charging between 0C-5C. */
@@ -258,11 +258,11 @@ struct hi6521_device_info {
     int  second_stage_voltage;
     int  is_disable_cool_temperature_charger;
     int  high_temp_para;
-	int  irq;
-	int  interrput_gpio;
-	int  gpio_ce;
-	int  gpio_ovlo_en;
-	int  ovlo_flag;
+    int  irq;
+    int  interrput_gpio;
+    int  gpio_ce;
+    int  gpio_ovlo_en;
+    int  ovlo_flag;
     /* BEGIN PN:DTS2014083001448, Added by l00189337, 2014/8/28*/
     int usb_shell_gpio;
     int usb_shell_gpio_valid;
@@ -387,13 +387,11 @@ STATIC struct hi6521_high_temp_cp japan_temp_cp[] ={
 extern struct class *hw_power_get_class(void);
 #define CHARGER_DSM(error_found,dsm_info,func,reg_value) do{ \
         if (error_found >= 0){\
-            dsm_client_record(charger_dclient, dsm_info,\
-				func, reg_value);\
+            dsm_client_record(charger_dclient, dsm_info, func, reg_value);\
             error_found++;\
         }\
 }while(0)
 
-	
 /**********************************************************
 *  Function:       dsm_report
 *  Discription:    dsm report interface
@@ -518,7 +516,7 @@ STATIC void charge_select_charging_current_voltage(struct hi6521_device_info *di
 
 STATIC void hi6521_get_boardid_japan_charge_parameter(struct hi6521_device_info *di)
 {
-	int ret;
+    int ret;
     struct device_node* np;
 
     np = di->dev->of_node;
@@ -557,36 +555,35 @@ STATIC int hi6521_get_boardid_charge_parameter(struct hi6521_device_info *di)
 {
     bool ret = 0;
 
-	struct battery_charge_param_s charge_param = {0};
-	ret = hisi_battery_charge_param(&charge_param);
-	if (ret){
-		if (CHG_V210 == s_scharger_version){
-			di->max_voltagemV = charge_param.max_voltagemV - 50;/*scharger(210/211/212) need sub 50mv*/
-		}
-		else{
-			di->max_voltagemV = charge_param.max_voltagemV;
-		}
-	    di->max_currentmA = charge_param.max_currentmA;
-	    di->max_cin_currentmA = charge_param.max_cin_currentmA;
+    struct battery_charge_param_s charge_param = {0};
+    ret = hisi_battery_charge_param(&charge_param);
+    if (ret) {
+        if (CHG_V210 == s_scharger_version){
+            di->max_voltagemV = charge_param.max_voltagemV - 50;/*scharger(210/211/212) need sub 50mv*/
+        }
+        else{
+            di->max_voltagemV = charge_param.max_voltagemV;
+        }
+        di->max_currentmA = charge_param.max_currentmA;
+        di->max_cin_currentmA = charge_param.max_cin_currentmA;
         di->design_capacity = charge_param.design_capacity;
         di->charge_in_temp_5 = charge_param.charge_in_temp_5;
         di->charge_in_temp_10 = charge_param.charge_in_temp_10;
-	    hwlog_info("%s: capacity is %d, charge_in_temp_5 is %d,"
+        hwlog_info("%s: capacity is %d, charge_in_temp_5 is %d,"
            "charge_in_temp_10 is %d.\n",__FUNCTION__,di->design_capacity,
            di->charge_in_temp_5,di->charge_in_temp_10);
-		return true;
-	}
-    else{
+        return true;
+    } else {
         hwlog_err( " hi6521 get charge parameter from boardid fail \n");
         di->max_voltagemV = 4208;
         di->max_currentmA = 1000;
         di->max_cin_currentmA = 1000;
-	    /* Configuration parameters for 0C-10C, set the default to the parameters,
-       	and get the values from boardid files */
-	    di->design_capacity   = HI6521_DEFAULT_CAPACITY;
-	    di->charge_in_temp_5  = DEFAULT_CHARGE_PARAM_LOW_TEMP;
-	    di->charge_in_temp_10 = DEFAULT_CHARGE_PARAM_LOW_TEMP;
-	    hwlog_info("%s: capacity is %d, charge_in_temp_5 is %d,"
+        /* Configuration parameters for 0C-10C, set the default to the parameters,
+        and get the values from boardid files */
+        di->design_capacity   = HI6521_DEFAULT_CAPACITY;
+        di->charge_in_temp_5  = DEFAULT_CHARGE_PARAM_LOW_TEMP;
+        di->charge_in_temp_10 = DEFAULT_CHARGE_PARAM_LOW_TEMP;
+        hwlog_info("%s: capacity is %d, charge_in_temp_5 is %d,"
            "charge_in_temp_10 is %d.\n",__FUNCTION__,di->design_capacity,
            di->charge_in_temp_5,di->charge_in_temp_10);
         return false;
@@ -601,16 +598,15 @@ STATIC int hi6521_get_max_charge_voltage(struct hi6521_device_info *di)
 
     struct battery_charge_param_s charge_param = {0};
     ret = hisi_battery_charge_param(&charge_param);
-    if (ret){
-		if (CHG_V210 == s_scharger_version){
-			di->max_voltagemV = charge_param.max_voltagemV - 50;
-		}
-		else{
-			di->max_voltagemV = charge_param.max_voltagemV;
-		}
-		return true;
-    }
-	else{
+    if (ret) {
+        if (CHG_V210 == s_scharger_version){
+            di->max_voltagemV = charge_param.max_voltagemV - 50;
+        }
+        else{
+            di->max_voltagemV = charge_param.max_voltagemV;
+        }
+        return true;
+    } else {
         di->max_voltagemV = 4208;
         hwlog_err( "boardid does not set limited charge voltage\n");
         return false;
@@ -738,11 +734,11 @@ STATIC void hi6521_config_input_source_reg(struct hi6521_device_info *di)
           vindpm = VINDPM_MIN_3880;
       else if (vindpm > VINDPM_MAX_5080)
           vindpm = VINDPM_MAX_5080;
-	  Vdpm = (unsigned char)((vindpm -VINDPM_MIN_3880)/VINDPM_STEP_80);
+      Vdpm = (unsigned char)((vindpm -VINDPM_MIN_3880)/VINDPM_STEP_80);
 
-	  if (dbg_current_iin){
-		  di->cin_limit = dbg_current_iin;
-	  }
+      if (dbg_current_iin){
+          di->cin_limit = dbg_current_iin;
+      }
 
       if (di->cin_limit <= IINLIM_100)
           Iin_limit = 0;
@@ -752,8 +748,8 @@ STATIC void hi6521_config_input_source_reg(struct hi6521_device_info *di)
           Iin_limit = 2;
       else if (di->cin_limit > IINLIM_500 && di->cin_limit <= IINLIM_900)
           Iin_limit = 3;
-	  else if (di->cin_limit > IINLIM_900 && di->cin_limit <= IINLIM_1000)
-		  Iin_limit = 4;
+      else if (di->cin_limit > IINLIM_900 && di->cin_limit <= IINLIM_1000)
+          Iin_limit = 4;
       else if (di->cin_limit > IINLIM_1000 && di->cin_limit <= IINLIM_1200)
           Iin_limit = 5;
       else if (di->cin_limit > IINLIM_1200 && di->cin_limit <= IINLIM_1500)
@@ -766,13 +762,13 @@ STATIC void hi6521_config_input_source_reg(struct hi6521_device_info *di)
           Iin_limit = 9;
       else if (di->cin_limit > IINLIM_2000 && di->cin_limit <= IINLIM_2200)
           Iin_limit = 10;
-	  else if (di->cin_limit > IINLIM_2200 && di->cin_limit <= IINLIM_2500)
+      else if (di->cin_limit > IINLIM_2200 && di->cin_limit <= IINLIM_2500)
           Iin_limit = 11;
       else
           Iin_limit = 4;
 
       di->input_source_reg.reg.buck_int_lim_sel = Iin_limit;
-	  di->input_source_reg.reg.buck_dpm_sel     = Vdpm;
+      di->input_source_reg.reg.buck_dpm_sel     = Vdpm;
 
       hi6521_write_byte(di, di->input_source_reg.value, INPUT_SOURCE_REG);
       return;
@@ -1604,10 +1600,10 @@ STATIC void hi6521_config_opt_param(struct hi6521_device_info *di)
 
 	if ((CHG_V200 == chg_version) && (CHG_V200 == v210_fx))
 	{
-		hi6521_write_byte(di, 0x0D, 0x54);
+	    hi6521_write_byte(di, 0x0D, 0x54);
 	    hi6521_write_byte(di, 0xB6, 0x3A);
-		hi6521_write_byte(di, 0x12, 0x21);
-		hi6521_write_byte(di, 0x7B, 0x25);
+	    hi6521_write_byte(di, 0x12, 0x21);
+	    hi6521_write_byte(di, 0x7B, 0x25);
 	    hi6521_write_byte(di, 0x07, 0x27);
 	    hi6521_write_byte(di, 0x7F, 0x1C);
 	    hi6521_write_byte(di, 0x78, 0x17);
@@ -1623,7 +1619,7 @@ STATIC void hi6521_config_opt_param(struct hi6521_device_info *di)
 	    hi6521_write_byte(di, 0xF9, 0x5B);
 	    hi6521_write_byte(di, 0x37, 0x5D);
 	    hi6521_write_byte(di, 0x18, 0x2F);
-		hi6521_write_byte(di, 0x3C, 0x31);
+	    hi6521_write_byte(di, 0x3C, 0x31);
 
 	    hi6521_write_byte(di, 0x10, 0x0C);
 	    hi6521_write_byte(di, 0x03, 0x0D);
@@ -1638,11 +1634,11 @@ STATIC void hi6521_config_opt_param(struct hi6521_device_info *di)
 	}
 	else
 	{
- 		hi6521_write_byte(di, 0x14, 0x48);
+	    hi6521_write_byte(di, 0x14, 0x48);
 	    hi6521_write_byte(di, 0x8A, 0x40);
 
-		hi6521_write_byte(di, 0x2A, 0x42);
-		hi6521_write_byte(di, 0x11, 0x3B);
+	    hi6521_write_byte(di, 0x2A, 0x42);
+	    hi6521_write_byte(di, 0x11, 0x3B);
 	    hi6521_write_byte(di, 0xF3, 0x37);
 	    hi6521_write_byte(di, 0x82, 0x45);
 	    hi6521_write_byte(di, 0x25, 0x41);
@@ -1692,8 +1688,7 @@ STATIC void hi6521_config_opt_param(struct hi6521_device_info *di)
 	if (((0 == chg_version) && (1 == v210_fx)) ||
 		((0 == chg_version) && (2 == v210_fx)) ||
 		((0 == chg_version) && (3 == v210_fx)) ||
-		((2 == chg_version) && (3 == v210_fx))) { /*215-220,开启反向放电的ocp*/
-
+		((2 == chg_version) && (3 == v210_fx))) {
 		hi6521_write_byte(di, 0x18, 0x63);
 	}
 
@@ -1715,12 +1710,12 @@ int scharger_power_status(int id)
 		return -1;
 	}
 	ret = hi6521_read_byte(scharger_di, &scharger_di->power_on_config_reg00.value, POWER_ON_CONFIG_REG00);
-	if (ret){
+	if (ret) {
 		hwlog_err("read power_on reg00  fail ! \n");
 		return ret;
 	}
 	ret = hi6521_read_byte(scharger_di, &scharger_di->power_on_config_reg01.value, POWER_ON_CONFIG_REG01);
-	if (ret){
+	if (ret) {
 		hwlog_err("read power_on reg01  fail ! \n");
 		return ret;
 	}
@@ -2185,7 +2180,7 @@ STATIC void hi6521_calling_limit_ac_input_current(struct hi6521_device_info *di,
            } else {
                iin_temp = di->max_cin_currentmA;
                /* battery whose max_voltage is above 4.35V is easy to broken
-                  when the temperature is below 10℃.
+                  when the temperature is below 10 C
                   So we need set the Current below 0.x * Capacity. */
                ichg_temp = di->design_capacity / 10 * di->charge_in_temp_5;
            }
@@ -2667,7 +2662,7 @@ STATIC void hi6521_monitor_battery_ntc_charging(struct hi6521_device_info *di)
     return;
 }
 
-#if 1 /*V8打桩*/
+#if 1
 STATIC int hi6521_check_backup_battery_exist(struct hi6521_device_info *di)
 {
 	return 0;
@@ -4021,7 +4016,7 @@ STATIC ssize_t hi6521_show_dppm_voltage(struct device *dev,
 
     //val = di->cin_dpmmV;
 	ret = hi6521_read_byte(di,&di->input_source_reg.value, INPUT_SOURCE_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)di->input_source_reg.reg.buck_dpm_sel;
@@ -4060,7 +4055,7 @@ STATIC ssize_t hi6521_show_iin_runningtest(struct device *dev,
     struct hi6521_device_info *di = dev_get_drvdata(dev);
 
 	ret = hi6521_read_byte(di,&di->input_source_reg.value, INPUT_SOURCE_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)di->input_source_reg.reg.buck_int_lim_sel;
@@ -4095,7 +4090,7 @@ STATIC ssize_t hi6521_show_fast_voltage(struct device *dev,
 	int ret = 0;
     struct hi6521_device_info *di = dev_get_drvdata(dev);
 	ret = hi6521_read_byte(di,&di->charge_fast_vol_term_cur_reg.value, CHG_FAST_VOL_TERM_CUR_REG);
-	if(ret)	{
+	if(ret) {
 		val = ret;
 	} else {
 		val = (int)(di->charge_fast_vol_term_cur_reg.reg.chg_fast_vchg * CHG_FAST_VCHG_STEP_50 + CHG_FAST_VCHG_MIN);
@@ -4132,7 +4127,7 @@ STATIC ssize_t hi6521_show_ichg_runningtest(struct device *dev,
     struct hi6521_device_info *di = dev_get_drvdata(dev);
 
 	ret = hi6521_read_byte(di,&di->charge_fast_current_reg.value, CHG_FAST_CURRENT_REG);
-	if(ret)	{
+	if(ret) {
 		val = ret;
 	} else {
 		val = (int)(di->charge_fast_current_reg.reg.chg_fast_ichg * CHG_FAST_ICHG_STEP_100 + CHG_FAST_ICHG_MIN);
@@ -4168,7 +4163,7 @@ STATIC ssize_t hi6521_show_precharge_current(struct device *dev,
 
     //val = di->chg_pre_ichg;
     ret = hi6521_read_byte(di,&di->charge_pre_current_vol_reg.value, CHG_PRE_VOL_CURRENT_BATFET_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)(di->charge_pre_current_vol_reg.reg.chg_pre_ichg * CHG_PRG_ICHG_STEP_100 + CHG_PRG_ICHG_MIN);
@@ -4212,7 +4207,7 @@ STATIC ssize_t hi6521_show_precharge_voltage(struct device *dev,
 
     //val = di->chg_pre_ichg;
     ret = hi6521_read_byte(di,&di->charge_pre_current_vol_reg.value, CHG_PRE_VOL_CURRENT_BATFET_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)di->charge_pre_current_vol_reg.reg.chg_pre_vchg;
@@ -4256,7 +4251,7 @@ STATIC ssize_t hi6521_show_termination_current(struct device *dev,
 
     //val = di->chg_term_ichg;
     ret = hi6521_read_byte(di,&di->charge_fast_vol_term_cur_reg.value, CHG_FAST_VOL_TERM_CUR_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)(di->charge_fast_vol_term_cur_reg.reg.chg_term_ichg * CHG_TERM_ICHG_STEP_50 + CHG_TERM_ICHG_MIN);
@@ -4291,7 +4286,7 @@ STATIC ssize_t hi6521_show_enable_itermination(struct device *dev,
 
     //val = di->chg_termination_ctrl;
     ret = hi6521_read_byte(di,&di->charge_fast_safe_timer_term_ctrl_reg.value, CHG_FAST_SAFE_TIMER_TERM_CTRL_REG);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)di->charge_fast_safe_timer_term_ctrl_reg.reg.chg_termination_ctrl;
@@ -4367,7 +4362,7 @@ STATIC ssize_t hi6521_show_enable_charger(struct device *dev,
 
     //val = di->chg_en ;
     ret = hi6521_read_byte(di,&di->power_on_config_reg01.value, POWER_ON_CONFIG_REG01);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	} else {
 		val = (int)di->power_on_config_reg01.reg.chg_en_int;
@@ -4592,7 +4587,7 @@ STATIC ssize_t hi6521_show_reg_info(struct device *dev,
     struct hi6521_device_info *di = dev_get_drvdata(dev);
 
     ret = hi6521_read_byte(di, &val,(u8)g_reg_addr);
-	if(ret)	{
+	if (ret) {
 		val = ret;
 	}
 	return snprintf(buf, PAGE_SIZE, "reg[0x%x]=0x%x\n",(u32)g_reg_addr,val);
@@ -5025,11 +5020,11 @@ STATIC ssize_t hi6521_set_enable_hiz(struct device *dev,
         return -EINVAL;
     }
     if(val == 1){
-        hwlog_info("[%s] HIZ,enable:%d\n",__func__,val);
+        hwlog_info("[%s] HIZ,enable:%ld\n",__func__,val);
         gpio_direction_output(di->gpio_ovlo_en,1);
         return status;
     }else{
-        hwlog_info("[%s] HIZ,enable:%d\n",__func__,val);
+        hwlog_info("[%s] HIZ,enable:%ld\n",__func__,val);
         gpio_direction_output(di->gpio_ovlo_en,0);
         return status;
     }
@@ -5041,7 +5036,7 @@ STATIC ssize_t hi6521_show_chargerType(struct device *dev,
 {
     struct hi6521_device_info *di = dev_get_drvdata(dev);
 
-    return snprintf(buf,PAGE_SIZE, "%d\n", di->event);
+    return snprintf(buf,PAGE_SIZE, "%lu\n", di->event);
 }
 
 STATIC DEVICE_ATTR(dppm_voltage, (S_IWUSR | S_IRUGO),
