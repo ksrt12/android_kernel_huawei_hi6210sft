@@ -531,7 +531,7 @@ int balong_ade_open(struct inode* inode, struct file* file)
         return -EINVAL;
     }
 
-    balongfb_logi("enter succ ! \n");
+//    balongfb_logi("enter succ ! \n");
 
     if (g_ade_pri_data == NULL) {
         balongfb_loge("pfd_data is null \n");
@@ -557,7 +557,7 @@ int balong_ade_open(struct inode* inode, struct file* file)
     g_debug_dis_ade_ioctl = 0;
 #endif
 
-    balongfb_logi("exit succ ! \n");
+//    balongfb_logi("exit succ ! \n");
     return 0;
 }
 
@@ -574,7 +574,7 @@ int balong_ade_release(struct inode* inode, struct file* file)
         return -EINVAL;
     }
 
-    balongfb_logi("enter succ ! \n");
+//    balongfb_logi("enter succ ! \n");
 
     ade_pri_data = file->private_data;
     if (NULL == ade_pri_data) {
@@ -595,7 +595,7 @@ int balong_ade_release(struct inode* inode, struct file* file)
 
     file->private_data = NULL;
 
-    balongfb_logi("exit succ ! \n");
+//    balongfb_logi("exit succ ! \n");
     return 0;
 }
 
@@ -1006,7 +1006,7 @@ struct platform_device* balong_compose_add_device(struct platform_device *pdev, 
     BUG_ON(pdev == NULL);
     BUG_ON(pfd == NULL);
 
-    balongfb_logi("enter succ !");
+//    balongfb_logi("enter succ !");
 
     this_dev = platform_device_alloc(DRV_ADE_COMPOSE_NAME, 1);
     BUG_ON(this_dev == NULL);
@@ -1021,7 +1021,7 @@ struct platform_device* balong_compose_add_device(struct platform_device *pdev, 
         return NULL;
     }
 
-    balongfb_logi("exit succ !");
+//    balongfb_logi("exit succ !");
 
     return this_dev;
 }

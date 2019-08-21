@@ -1700,7 +1700,7 @@ STATIC int balong_fb_check_var(struct fb_var_screeninfo *var, struct fb_info *in
         return -EINVAL;
     }
 
-    balongfb_logi("enter succ !");
+//    balongfb_logi("enter succ !");
 
     if (var->rotate != FB_ROTATE_UR) {
         balongfb_loge("rotate %d!\n", var->rotate);
@@ -1777,7 +1777,7 @@ STATIC int balong_fb_check_var(struct fb_var_screeninfo *var, struct fb_info *in
         return -EINVAL;
     }
 
-    balongfb_logi("exit succ !");
+//    balongfb_logi("exit succ !");
 
     return ret;
 }
@@ -2701,7 +2701,6 @@ STATIC int balong_fb_probe(struct platform_device *pdev)
             return -ENXIO;
         }
 
-        /*获取smmu状态，0smmu关闭 1smmu打开*/
         //g_smmu_flag = hisi_ion_get_media_mode();
 
         //pr_info("%s smmu falg %d! \n",__func__,g_smmu_flag);
