@@ -1558,7 +1558,7 @@ void reset_only_for_test(int iparam)
     case 15:
         up(&(g_reset_assistant.sem_wait_ccorereset_ok));
         break;
-    default:
+    default:
         break;
     }
 #endif

@@ -288,7 +288,7 @@ struct hcc_rx_action
     int32               registered;
     hcc_rx_cb_func      rx_cb;
     void               *context;
-};
+};
 /* DTS2014011406396  Hi110x bug fix zhouxinfeng/z00262551 2014/1/14 begin */
 /*indicate the direction, host  between device*/
 typedef enum _hwifi_trans_flow_dir_

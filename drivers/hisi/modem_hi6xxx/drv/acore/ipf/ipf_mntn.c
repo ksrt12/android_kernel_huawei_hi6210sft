@@ -348,7 +348,7 @@ BSP_S32 BSP_IPF_CHInfo(IPF_CHANNEL_TYPE_E eChnType)
     IPF_PRINT_ERROR("=============END============\n");
     return 0;
 }
-
+
 EXPORT_SYMBOL(BSP_IPF_Help);
 EXPORT_SYMBOL(BSP_IPF_RegDump);
 EXPORT_SYMBOL(BSP_IPF_DbgInfo);

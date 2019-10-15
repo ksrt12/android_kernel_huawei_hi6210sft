@@ -51,7 +51,7 @@ static const char* const modem_state_str[] = {
 };
 
 /*To make modem poweroff called only once when there are two rilds.*/
-static int modem_power_off_flag = 0; 
+static int modem_power_off_flag = 0;
 
 /*****************************************************************************
  函 数 名  : balong_power_reset_work
@@ -86,7 +86,7 @@ void modem_wdt_disable(void)
 	       SOC_MODEM_SCTRL_MDMSC_AO_CLKDIS_ADDR(0), /*only get offset*/
 	       SOC_MODEM_SCTRL_MDMSC_AO_CLKDIS_ao_peri_clkdis_watchdog0_pclk_START,
 	       SOC_MODEM_SCTRL_MDMSC_AO_CLKDIS_ao_peri_clkdis_watchdog0_pclk_END,
-	       1);	
+	       1);
 #else
     phy_reg_writel(SOC_SC_ON_BASE_ADDR,
 	       SOC_AO_SCTRL_SC_PERIPH_CLKDIS6_ADDR(0), /*only get offset*/
@@ -145,17 +145,17 @@ static ssize_t modem_reset_set(struct device *dev,
         ccorereset_tonotify(DRV_RESET_CALLCBFUN_RESET_BEFORE, BSP_RESET_MODULE_MCU);
 
         /*等待收到MCU回复消息*/
-        if (0 != down_timeout(&(g_reset_assistant.sem_wait_mcu_msg), 
+        if (0 != down_timeout(&(g_reset_assistant.sem_wait_mcu_msg),
             msecs_to_jiffies(RESET_WAIT_TIMEOUT_MCU_MAILMSG)))
         {
             pr_err("Balong_power : Wait mailbox msg from mcu timeout !!!\n");
         }
-        
+
         /*Reset icc;*/
         BSP_ICC_ResetFun();
 
         modem_wdt_disable();
-        
+
         /*Reset c core*/
         ccorereset_doreset();
 

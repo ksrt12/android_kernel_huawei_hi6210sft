@@ -4592,7 +4592,7 @@ int bsp_linux_closedir( DRV_DIR_S *dirp )
     fs = get_fs();
     set_fs(KERNEL_DS);
 
-    f = dirp->dd_fd;
+    f = dirp->dd_fd;
 
     ret = sys_close(f);
     if(ret < 0)

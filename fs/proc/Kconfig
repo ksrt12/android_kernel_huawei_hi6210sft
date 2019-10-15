@@ -74,7 +74,7 @@ config PROC_APP_INFO
         help
         support charge when machine power off & recovery.
 
-+config PROC_POSTFSDATA
+config PROC_POSTFSDATA
 	bool "/proc/post-fs-data support"
 	default y
 	help
