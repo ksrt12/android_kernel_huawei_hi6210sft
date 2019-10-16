@@ -97,7 +97,7 @@ int hisi_ion_get_heap_info(unsigned int id, struct ion_heap_info_data* data)
             data->heap_phy  = hisi_ion_platform_heap[i].base;
             data->heap_size = hisi_ion_platform_heap[i].size;
             strncpy((void* )data->name, (void* )hisi_ion_platform_heap[i].name, HISI_ION_NAME_LEN);
-            pr_info("heap info : id %d name %s phy 0x%#x size %#x\n",
+            pr_info("heap info : id %d name %s phy 0x%#llx size %#x\n",
                 id, data->name, data->heap_phy, data->heap_size);
             return 0;
         }

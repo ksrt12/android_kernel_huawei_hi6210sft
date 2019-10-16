@@ -747,7 +747,7 @@ hisi_mbox_startup(struct hisi_mbox_device *mdev, mbox_mail_type_t mail_type)
 
 			init_waitqueue_head(&mdev->tx_wait);
 			/*create the async tx thread*/
-		    mdev->tx_kthread = kthread_create(hisi_mbox_tx_thread, (unsigned long)mdev, "%s", mdev->name);
+		    mdev->tx_kthread = kthread_create(hisi_mbox_tx_thread, (long unsigned int)mdev, "%s", mdev->name);
 		    if (unlikely(IS_ERR(mdev->tx_kthread)))
 		    {
 		        	MBOX_PR_ERR("create kthread tx_kthread failed!\n");

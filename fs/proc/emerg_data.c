@@ -26,7 +26,7 @@ static int emergdata_info_show(struct seq_file *m, void *v)
 	len = seq_printf(m,"%d\n",get_datamount_flag());
 	return 0;
 }
-int emergdata_write_proc(struct file *file, const char *buffer, unsigned long count, void *data) {
+int emergdata_write(struct file *file, const char *buffer, unsigned long count, void *data) {
     long value = -1;
     int strtol_ret = -1;
     int ret = -EINVAL;
@@ -71,7 +71,7 @@ static int emergdata_open(struct inode *inode, struct file *file)
 static const struct file_operations emergdata_proc_fops = {
 	.open		= emergdata_open,
 	.read		= seq_read,
-    .write      = emergdata_write_proc,
+	.write		= emergdata_write,
 	.llseek		= seq_lseek,
 	.release	= single_release,
 };

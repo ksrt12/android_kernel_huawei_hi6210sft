@@ -156,18 +156,18 @@ int pasr_register_mask_function(phys_addr_t addr, void *function, void *cookie)
 	struct pasr_die *die = pasr_addr2die(pasr.map, addr);
 
 	if (!die) {
-		pr_err("%s: No DDR die corresponding to address 0x%08x\n",
+		pr_err("%s: No DDR die corresponding to address 0x%08llx\n",
 				__func__, addr);
 		return -EINVAL;
 	}
 
 	if (addr != die->start)
-		pr_warning("%s: Addresses mismatch (Die = 0x%08x, addr = 0x%08x\n"
+		pr_warning("%s: Addresses mismatch (Die = 0x%08llx, addr = 0x%08llx\n"
 				, __func__, die->start, addr);
 
 	die->cookie = cookie;
 	die->apply_mask = function;
-    printk(KERN_ERR"%s:%d: die: 0x%x; addr: 0x%x; die->cookie: %d; die->mem_reg: 0x%x\n", 
+    printk(KERN_ERR"%s:%d: die: 0x%x; addr: 0x%llx; die->cookie: %p; die->mem_reg: 0x%x\n",
             __func__, __LINE__, die, addr, die->cookie, die->mem_reg);
 	die->apply_mask(&die->mem_reg, die->cookie);
 

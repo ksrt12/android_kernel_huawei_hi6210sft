@@ -44,7 +44,7 @@ obj-$(CONFIG_HI6402_HIFI_MISC) += hi6402dsp/
 obj-$(CONFIG_SUSPEND) += pm_common/
 obj-$(CONFIG_HISI_HMPTH_SET) += hmpthresholds/
 obj-$(CONFIG_HISILICON_PLATFORM_KEYMASTER) += keymaster/
-obj-$(CONFIG_HISILICON_PLATFORM)                                       += secure_boot/
+obj-$(CONFIG_HISILICON_PLATFORM) += secure_boot/
 
 ifeq ($(TARGET_VERSION_MODE),factory)
 CFLAGS_KERNEL   += -DCONFIG_FACTORY_MODE

@@ -247,8 +247,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
-HOSTCXXFLAGS = -O2
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89 -pipe
+HOSTCXXFLAGS = -O2 -pipe
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -353,7 +353,8 @@ AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
 CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
-CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
+CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
+CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
 
 
 BALONG_INC := -I$(srctree)/drivers -I$(srctree)/mm -I$(srctree)/drivers/hisi/ap/config/product/hi6210sft/include -I$(srctree)/drivers/hisi/ap/platform/hi6210sft
@@ -379,6 +380,8 @@ endif
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
+OPT_FLAGS	:= -march=armv8-a+simd+crypto+crc -mcpu=cortex-a53 -mtune=cortex-a53
+
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Wimplicit-function-declaration \
@@ -389,9 +392,11 @@ KBUILD_CFLAGS   += -Wno-unused-variable -Wno-unused-function -Wno-unused-label -
                    -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast -Wno-sizeof-pointer-memaccess \
                    -Wno-declaration-after-statement -DHISI_EFUSE_DEBUG=0
 
+KBUILD_CFLAGS   += -std=gnu89 $(call cc-option,-fno-PIE) $(OPT_FLAGS)
+
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
-KBUILD_AFLAGS   := -D__ASSEMBLY__
+KBUILD_AFLAGS   := -D__ASSEMBLY__ $(call cc-option,-fno-PIE)
 KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
@@ -455,6 +460,7 @@ endif
 
 export KBUILD_CPPFLAGS NOSTDINC_FLAGS LINUXINCLUDE OBJCOPYFLAGS LDFLAGS
 export KBUILD_CFLAGS CFLAGS_KERNEL CFLAGS_MODULE CFLAGS_GCOV
+export CFLAGS_KCOV
 export KBUILD_AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 export KBUILD_AFLAGS_MODULE KBUILD_CFLAGS_MODULE KBUILD_LDFLAGS_MODULE
 export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
@@ -632,13 +638,24 @@ endif # $(dot-config)
 # Defaults to vmlinux, but the arch makefile usually adds further targets
 all: vmlinux
 
+KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, frame-address)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, format-truncation)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, maybe-uninitialized)
+
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+KBUILD_CFLAGS	+= -Os
 else
 KBUILD_CFLAGS	+= -O2 -g
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
+
+KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 
 ifdef CONFIG_READABLE_ASM
 # Disable optimizations that make assembler listings hard to read.
@@ -662,6 +679,12 @@ endif
 # This warning generated too much noise in a regular build.
 # Use make W=1 to enable this warning (see scripts/Makefile.build)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
+KBUILD_CFLAGS += $(call cc-disable-warning, attribute-alias)
+KBUILD_CFLAGS += $(call cc-disable-warning, packed-not-aligned)
+KBUILD_CFLAGS += $(call cc-disable-warning, stringop-truncation)
+KBUILD_CFLAGS += $(call cc-disable-warning, misleading-indentation)
+KBUILD_CFLAGS += $(call cc-disable-warning, array-bounds)
 
 ifdef CONFIG_FRAME_POINTER
 KBUILD_CFLAGS	+= -fno-omit-frame-pointer -fno-optimize-sibling-calls
@@ -711,8 +734,8 @@ endif
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 CHECKFLAGS     += $(NOSTDINC_FLAGS)
 
-# warn about C99 declaration after statement
-KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
+# no warn about C99 declaration after statement
+KBUILD_CFLAGS += $(call cc-disable-warning, declaration-after-statement,)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
@@ -1213,9 +1236,9 @@ help:
 	@echo  '  gtags           - Generate GNU GLOBAL index'
 	@echo  '  kernelrelease	  - Output the release version string'
 	@echo  '  kernelversion	  - Output the version stored in Makefile'
-	@echo  '  headers_install - Install sanitised kernel headers to INSTALL_HDR_PATH'; \
-	 echo  '                    (default: $(INSTALL_HDR_PATH))'; \
-	 echo  ''
+	@echo  '  headers_install - Install sanitised kernel headers to INSTALL_HDR_PATH'
+	@echo  '                    (default: $(INSTALL_HDR_PATH))'
+	@echo  ''
 	@echo  'Static analysers'
 	@echo  '  checkstack      - Generate a list of stack hogs'
 	@echo  '  namespacecheck  - Name space analysis on compiled kernel'

@@ -10,9 +10,8 @@ EXTRA_CFLAGS += \
 	     -DDX_TST_HARDWARE_REG_PRINT_MODE=0 \
 	     -DSEP_SUPPORT_SHA=0 \
 	     -I$(SB_PATH)/boot_images_verifier \
-         -I$(srctree)/include/linux/hisi \
+	     -I$(srctree)/include/linux/hisi \
              -I$(SB_PATH)/inc
-EXTRA_CFLAGS += -DDX_SB_HASH_LENGTH_IN_WORDS=4 -DDX_SB_MAX_NUM_OF_OTP_KEYS=2 -DDX_DOUBLE_BUFFER_MAX_SIZE_IN_BYTES=32768
 EXTRA_CFLAGS += -DDX_SB_ADDITIONAL_DATA_SUPPORTED -DDX_SB_RAM_USAGE_ONLY -DDX_SB_INDIRECT_SRAM_ACCESS
 
 obj-y += hisi_secureboot.o

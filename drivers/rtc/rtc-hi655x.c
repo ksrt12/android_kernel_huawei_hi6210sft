@@ -300,7 +300,7 @@ static int soc_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	if (ret == 0) {
 		ret = rtc_tm_to_time(&alarm->time, &time);
 		if (ret == 0) {
-			printk(KERN_INFO "[%s:%d] Time[0x%x] will writed to RTCMR\n",
+			printk(KERN_INFO "[%s:%d] Time[0x%lx] will writed to RTCMR\n",
 			       __FUNCTION__, __LINE__,time);
 			writel(time, prtc->baseaddr + SOC_RTCMR);
 			soc_rtc_alarm_irq_enable(dev, alarm->enabled);
@@ -367,7 +367,7 @@ static irqreturn_t soc_rtc_interrupt(int irq, void *dev_id)
 	rtcmis = readl(prtc->baseaddr + SOC_RTCMIS); /*read interrupt*/
 	if (rtcmis) {
 		writel(rtcmis, prtc->baseaddr + SOC_RTCICR); /*clear interrupt*/
-		printk(KERN_INFO "[%s:%d] RTC TIMER IRQ status [0x%x]\n", rtcmis);
+		printk(KERN_INFO "[%d:%d] RTC TIMER IRQ status [0x%x]\n", rtcmis);
 		if (rtcmis & SOC_RTCALARM_INT)
 			events |= (RTC_AF | RTC_IRQF);
 		rtc_update_irq(prtc->rtc_dev, 1, events);

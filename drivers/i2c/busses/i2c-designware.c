@@ -810,10 +810,10 @@ static void i2c_print_controller_reg(struct dw_i2c_dev *dev)
 	{
 		/* can't dump  DW_IC_DATA_CMD */
 		if(i != DW_IC_DATA_CMD){
-			printk(KERN_ERR "%08x: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
+			printk(KERN_ERR "%08lx: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}else{
-			printk(KERN_ERR "%08x: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
+			printk(KERN_ERR "%08lx: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}
 	}
@@ -827,10 +827,10 @@ static void i2c_print_controller_reg_test(struct dw_i2c_dev *dev)
 	{
 		/* can't dump  DW_IC_DATA_CMD */
 		if(i != DW_IC_DATA_CMD){
-			printk(KERN_ERR "%08x: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
+			printk(KERN_ERR "%08lx: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}else{
-			printk(KERN_ERR "%08x: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
+			printk(KERN_ERR "%08lx: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}
 	}
@@ -838,10 +838,10 @@ static void i2c_print_controller_reg_test(struct dw_i2c_dev *dev)
 	{
 		/* can't dump  DW_IC_DATA_CMD */
 		if(i != DW_IC_DATA_CMD){
-			printk(KERN_ERR "%08x: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
+			printk(KERN_ERR "%08lx: %08x, %08x, %08x, %08x\n", (unsigned long)(dev->base + i), readl(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}else{
-			printk(KERN_ERR "%08x: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
+			printk(KERN_ERR "%08lx: ........, %08x, %08x, %08x\n", (unsigned long)(dev->base + i),
 				readl(dev->base + i + 4), readl(dev->base + i + 8), readl(dev->base + i + 12));
 		}
 	}

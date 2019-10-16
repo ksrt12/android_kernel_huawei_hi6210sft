@@ -100,7 +100,7 @@ void __init add_ddr_die(phys_addr_t addr, unsigned long size)
 	if (size == SZ_1536MB || size == SZ_3072MB)
 		section_nr = 6;
 
-	pr_err("%s: addr=0x%08x, size=0x%08lx, nr = %lu\n", __func__, addr, size, section_nr);
+	pr_err("%s: addr=0x%08llx, size=0x%08lx, nr = %lu\n", __func__, addr, size, section_nr);
 
 	pasr_info.die[pasr_info.nr_dies].addr = addr;
 	pasr_info.die[pasr_info.nr_dies].size = size;
@@ -207,7 +207,7 @@ static struct ddr_die * __init addr2die(struct pasr_info *info, phys_addr_t addr
 			return &die[i];
 	}
 
-	pr_err("%s: No die found for address %#x",
+	pr_err("%s: No die found for address %#llx",
 			__func__, addr);
 
 	return NULL;
@@ -234,7 +234,7 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 		d1 = &info->die[i];
 
 		if (d1->size == 0) {
-			pr_err("%s: DDR die at %#x has 0 size\n",
+			pr_err("%s: DDR die at %#llx has 0 size\n",
 					__func__, d1->addr);
 			return -EINVAL;
 		}
@@ -242,7 +242,7 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 		/*  Check die is aligned on section boundaries */
 		if (((d1->addr % d1->section_size) != 0)
 			|| ((d1->size % d1->section_size) != 0)) {
-			pr_err("%s: DDR die at %#x (size %#lx) is not aligned"
+			pr_err("%s: DDR die at %#llx (size %#lx) is not aligned"
 					"on section boundaries %#lx\n",
 					__func__, d1->addr,
 					d1->size, d1->section_size);
@@ -256,7 +256,7 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 		d2 = d1;
 		d1 = &info->die[i-1];
 		if ((d1->addr + d1->size - 1) >= d2->addr) {
-			pr_err("%s: DDR dies at %#x and %#x are overlapping\n",
+			pr_err("%s: DDR dies at %#llx and %#llx are overlapping\n",
 					__func__, d1->addr, d2->addr);
 			return -EINVAL;
 		}
@@ -276,21 +276,21 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 
 		i1 = &info->int_area[i];
 		if (i1->size == 0) {
-			pr_err("%s: Interleaved area %#x/%#x  has 0 size\n",
+			pr_err("%s: Interleaved area %#llx/%#llx  has 0 size\n",
 					__func__, i1->addr1, i1->addr2);
 			return -EINVAL;
 		}
 
 		d1 = addr2die(info, i1->addr1);
 		if (!d1) {
-			pr_err("%s:[1] No DDR die corresponding to address 0x%08x\n",
+			pr_err("%s:[1] No DDR die corresponding to address 0x%08llx\n",
 					__func__, i1->addr1);
 			return -EINVAL;
 		}
 
 		d2 = addr2die(info, i1->addr2);
 		if (!d2) {
-			pr_err("%s:[2] No DDR die corresponding to address 0x%08x\n",
+			pr_err("%s:[2] No DDR die corresponding to address 0x%08llx\n",
 					__func__, i1->addr2);
 			return -EINVAL;
 		}
@@ -304,7 +304,7 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 		if (((i1->addr1 % d1->section_size) != 0)
 			|| ((i1->addr2 % d2->section_size) != 0)
 			|| ((i1->size % d1->section_size) != 0)) {
-			pr_err("%s: Interleaved area at %#x/%#x (size %#lx) is not"
+			pr_err("%s: Interleaved area at %#llx/%#llx (size %#lx) is not"
 					"aligned on section boundaries %#lx\n",
 					__func__, i1->addr1, i1->addr2,
 					i1->size, d1->section_size);
@@ -313,15 +313,15 @@ static int __init pasr_info_sanity_check(struct pasr_info *info)
 
 		/* Check interleaved areas are not overlapping */
 		if ((i1->addr1 + i1->size - 1) >= i1->addr2) {
-			pr_err("%s: Interleaved areas %#x"
-					"and %#x are overlapping\n",
+			pr_err("%s: Interleaved areas %#llx"
+					"and %#llx are overlapping\n",
 					__func__, i1->addr1, i1->addr2);
 			return -EINVAL;
 		}
 
 		/* Check the interleaved areas are in the physical areas */
 		if (pasr_check_interleave_in_physmem(info, i1)) {
-			pr_err("%s: Interleaved area %#x/%#x"
+			pr_err("%s: Interleaved area %#llx/%#llx"
 					"not in physical memory\n",
 					__func__, i1->addr1, i1->addr2);
 			return -EINVAL;
@@ -348,7 +348,7 @@ static void __init pasr_print_map(struct pasr_map *map)
 		pr_err("Die %d:\n", i);
 		for (j = 0; j < die->nr_sections; j++) {
 			struct pasr_section *s = &die->section[j];
-			pr_err("\tSection %d: @ = %#08x, Pair = %s\n"
+			pr_err("\tSection %d: @ = %#08llx, Pair = %s\n"
 					, j, s->start, s->pair ? "Yes" : "No");
 		}
 	}

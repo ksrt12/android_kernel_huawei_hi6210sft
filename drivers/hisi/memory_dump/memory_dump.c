@@ -171,13 +171,13 @@ int mem_dump_init(void)
 	printk("cb->section_size is 0x%llx\n", cb->section_size);
 	printk("cb->pmd_size is 0x%llx\n", cb->pmd_size);
 	printk("cb->mbr_size is 0x%x\n", cb->mbr_size);
-	printk("cb->kern_map_offset is 0x%llx\n", cb->kern_map_offset);
+	printk("cb->kern_map_offset is 0x%lx\n", cb->kern_map_offset);
 
 	printk("mem_map is %pK\n", mem_map);
 	printk("vmemmap is %pK\n", vmemmap);
 	for (i=0; i< print_mb_cb->cnt; i++) {
-		printk("print_mb_cb->regions is 0x%pK\n", print_mb_cb->regions->base);
-		printk("print_mb_cb->regions is 0x%pK\n", print_mb_cb->regions->size);
+		printk("print_mb_cb->regions is 0x%lldK\n", print_mb_cb->regions->base);
+		printk("print_mb_cb->regions is 0x%lldK\n", print_mb_cb->regions->size);
 	}
 
 	return 0;

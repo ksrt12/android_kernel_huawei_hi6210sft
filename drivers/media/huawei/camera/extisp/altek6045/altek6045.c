@@ -581,9 +581,9 @@ static DRIVER_ATTR(firmware, 0664, altel6045_firmware_show, altel6045_firmware_s
 static ssize_t altel6045_firmware_store(struct device_driver *drv,
 												  const char *buf, size_t count)
 {
-	cam_info("%s enter buf(%s),count(%d)", __func__, buf,count);
+	cam_info("%s enter buf(%s),count(%ld)", __func__, buf,count);
     strncpy(misp_firmware_path, buf, sizeof(misp_firmware_path));
-    cam_info("%s exit extisp_firmware(%s),count(%d)", __func__,
+    cam_info("%s exit extisp_firmware(%s),count(%ld)", __func__,
         misp_firmware_path,strlen(misp_firmware_path));
     return count;
 }
@@ -592,7 +592,7 @@ static ssize_t altel6045_firmware_show(struct device_driver *drv,
 												char *buf)
 {
     strncpy(buf, misp_firmware_path, strlen(misp_firmware_path)+1);
-    cam_info("%s extisp_firmware(%s),count(%d)", __func__, misp_firmware_path,strlen(misp_firmware_path));
+    cam_info("%s extisp_firmware(%s),count(%ld)", __func__, misp_firmware_path,strlen(misp_firmware_path));
 	return (strlen(misp_firmware_path));
 }
 

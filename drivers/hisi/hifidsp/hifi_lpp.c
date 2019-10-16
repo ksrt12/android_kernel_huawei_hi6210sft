@@ -1139,7 +1139,7 @@ error2:
 	}
 
 	if (para.para_size_out != sizeof(ret)) {
-		loge("the para_size_out(%u) is not equal to sizeof(ret)(%u) \n", para.para_size_out, sizeof(ret));
+		loge("the para_size_out(%u) is not equal to sizeof(ret)(%lu) \n", para.para_size_out, sizeof(ret));
 		ret = ERROR;
 		goto error1;
 	}

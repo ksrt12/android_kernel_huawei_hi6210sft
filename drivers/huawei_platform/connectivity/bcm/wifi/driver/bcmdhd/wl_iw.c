@@ -31,6 +31,12 @@ typedef const struct si_pub	si_t;
 #include <dngl_stats.h>
 #include <bcmsdbus.h>
 #include <dhd.h>
+#undef WL_ERROR
+#undef WL_TRACE
+#undef WL_ASSOC
+#undef WL_INFORM
+#undef WL_WSEC
+#undef WL_SCAN
 #define WL_ERROR(x) printk x
 #define WL_TRACE(x)
 #define WL_ASSOC(x)

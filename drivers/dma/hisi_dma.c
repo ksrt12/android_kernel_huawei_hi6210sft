@@ -360,7 +360,7 @@ static int hisi_dma_start_txd(struct hisi_dma_chan *c)
 		return -ENODEV;
 
 	if (BIT(c->phy->idx) & hisi_dma_get_chan_stat(d)) {
-        dev_err(d->slave.dev,  "%s: chan[%d] phy[%d] stat[0x%x]\n",
+        dev_err(d->slave.dev,  "%d: chan[%d] phy[%d] stat[0x%x]\n",
             c->vc.chan.chan_id, c->phy->idx, hisi_dma_get_chan_stat(d));
 		return -EBUSY;
     }
@@ -947,7 +947,7 @@ void show_dma_reg(struct dma_chan *chan)
 	}
 
     p = c->phy;
-    printk(KERN_ERR "%s: chan[%p] ccfg[0x%x] dir[%d] dev_addr[0x%x] status[%d]\n",
+    printk(KERN_ERR "%s: chan[%p] ccfg[0x%x] dir[%d] dev_addr[0x%llx] status[%d]\n",
             __func__, c, c->ccfg, c->dir, c->dev_addr, c->status);
     printk(KERN_ERR "%s: phy idx[0x%x] ds_run[%p] ds_done[p%p]\n",
             __func__, p->idx, p->ds_run, p->ds_done);
